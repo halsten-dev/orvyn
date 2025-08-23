@@ -38,6 +38,8 @@ type Widget[T any] struct {
 	focusManager *orvyn.FocusManager
 
 	itemConstructor ItemConstructor[T]
+
+	style lipgloss.Style
 }
 
 // New creates a new *Widget list and takes an itemConstructor as parameter.
@@ -125,7 +127,9 @@ func (w *Widget[T]) Render() string {
 	return lipgloss.JoinVertical(lipgloss.Center, b.String(), w.paginator.View())
 }
 
-func (w *Widget[T]) OnFocus() {}
+func (w *Widget[T]) OnFocus() {
+
+}
 
 func (w *Widget[T]) OnBlur() {}
 

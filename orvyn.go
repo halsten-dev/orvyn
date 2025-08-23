@@ -2,17 +2,19 @@
 package orvyn
 
 import (
+	"log"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"log"
+	"github.com/halsten-dev/orvyn/internal/theme"
 )
 
 var (
-	// ExitKeybind to manage global exit
-	ExitKeybind key.Binding
-
 	// ProcessExit determines if orvyn should manage the global exit keybind.
 	ProcessExit bool
+
+	// ExitKeybind to manage global exit
+	ExitKeybind key.Binding
 
 	// WindowSize hold the size of the Window.
 	WindowSize Size
@@ -27,6 +29,8 @@ var (
 	previousScreenID ScreenID
 
 	activeDialog *Dialog
+
+	activeTheme Theme
 )
 
 func Init() {
@@ -34,6 +38,7 @@ func Init() {
 	ProcessExit = true
 	WindowSize = NewSize(100, 100)
 	screens = make(map[ScreenID]Screen)
+	activeTheme = theme.DefaultDarkTheme{}
 }
 
 func Update(msg tea.Msg) tea.Cmd {
