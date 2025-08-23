@@ -66,6 +66,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.focusManager.ManageFocusNextPrevKeybind = false
 	w.focusManager.PreviousFocusKeybind = key.NewBinding(key.WithKeys("up"))
 	w.focusManager.NextFocusKeybind = key.NewBinding(key.WithKeys("down"))
+	w.focusManager.Focus(0)
 
 	w.OnBlur()
 
@@ -119,7 +120,6 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 func (w *Widget[T]) Render() string {
 	var b strings.Builder
 
-	// perPage := w.paginator.PerPage
 	count := 0
 	start, end := w.paginator.GetSliceBounds(len(w.listItems))
 
@@ -136,7 +136,9 @@ func (w *Widget[T]) Render() string {
 	return w.style.
 		Width(w.contentSize.Width).
 		Height(w.contentSize.Height).
-		Render(lipgloss.JoinVertical(lipgloss.Center, b.String(), w.paginator.View()))
+		Render(lipgloss.JoinVertical(
+			lipgloss.Center, b.String(),
+			w.paginator.View()))
 }
 
 func (w *Widget[T]) OnFocus() {
