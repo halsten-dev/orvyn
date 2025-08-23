@@ -3,6 +3,7 @@ package list
 import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
+	"github.com/halsten-dev/orvyn/theme"
 )
 
 type SimpleListItem struct {
@@ -41,11 +42,11 @@ func (s *SimpleListItem) Render() string {
 }
 
 func (s *SimpleListItem) OnFocus() {
-	s.style = lipgloss.NewStyle().Bold(true)
+	s.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleName)
 }
 
 func (s *SimpleListItem) OnBlur() {
-	s.style = lipgloss.NewStyle().Italic(true)
+	s.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleName)
 }
 
 func (s *SimpleListItem) OnEnterInput() {}

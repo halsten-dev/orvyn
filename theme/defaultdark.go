@@ -6,7 +6,7 @@ import (
 
 type DefaultDarkTheme struct{}
 
-func (d *DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
+func (d DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
 	var s lipgloss.Style
 
 	s = lipgloss.NewStyle()
@@ -31,7 +31,7 @@ func (d *DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
 	return s
 }
 
-func (d *DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
+func (d DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
 	var colorHexCode string
 
 	switch color {
@@ -46,6 +46,6 @@ func (d *DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
 	return lipgloss.Color(colorHexCode)
 }
 
-func (d *DefaultDarkTheme) Size(size SizeName) int {
+func (d DefaultDarkTheme) Size(size SizeName) int {
 	return 0
 }

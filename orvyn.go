@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/halsten-dev/orvyn/internal/theme"
+	"github.com/halsten-dev/orvyn/theme"
 )
 
 var (
@@ -30,7 +30,7 @@ var (
 
 	activeDialog *Dialog
 
-	activeTheme Theme
+	activeTheme theme.Theme
 )
 
 func Init() {
@@ -87,6 +87,12 @@ func Render() string {
 
 	layout.Resize(WindowSize)
 	return layout.Render()
+}
+
+// Theme
+
+func GetTheme() theme.Theme {
+	return activeTheme
 }
 
 // Screen management

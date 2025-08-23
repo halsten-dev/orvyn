@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
+	"github.com/halsten-dev/orvyn/theme"
 )
 
 type IListItem interface {
@@ -128,10 +129,12 @@ func (w *Widget[T]) Render() string {
 }
 
 func (w *Widget[T]) OnFocus() {
-
+	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleName)
 }
 
-func (w *Widget[T]) OnBlur() {}
+func (w *Widget[T]) OnBlur() {
+	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleName)
+}
 
 func (w *Widget[T]) OnEnterInput() {}
 
