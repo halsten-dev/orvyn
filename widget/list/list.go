@@ -1,0 +1,209 @@
+package list
+
+import (
+	"strings"
+
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/paginator"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn"
+)
+
+type IListItem interface {
+	orvyn.Focusable
+	orvyn.Renderable
+}
+
+// ItemConstructor defines the signature of the item constructor.
+// T type represents the type of the item data.
+type ItemConstructor[T any] func(T) IListItem
+
+// Widget defines a list widget.
+// T type represents the type of the item data.
+type Widget[T any] struct {
+	orvyn.BaseWidget
+	orvyn.BaseFocusable
+
+	InfiniteScroll bool
+
+	cursor      int
+	globalIndex int
+
+	listItems []IListItem
+	items     []T
+
+	paginator paginator.Model
+
+	focusManager *orvyn.FocusManager
+
+	itemConstructor ItemConstructor[T]
+}
+
+// New creates a new *Widget list and takes an itemConstructor as parameter.
+// T type represents the type of the item data.
+func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
+	w := new(Widget[T])
+
+	w.BaseWidget = orvyn.NewBaseWidget()
+
+	w.itemConstructor = itemConstructor
+
+	w.InfiniteScroll = false
+
+	w.cursor = 0
+
+	w.paginator = paginator.New()
+	w.paginator.Type = paginator.Dots
+	w.paginator.ActiveDot = lipgloss.NewStyle().Render("•")
+	w.paginator.InactiveDot = lipgloss.NewStyle().Render("•")
+
+	w.focusManager = orvyn.NewFocusManager()
+	w.focusManager.ManageFocusNextPrevKeybind = false
+	w.focusManager.PreviousFocusKeybind = key.NewBinding(key.WithKeys("up"))
+	w.focusManager.NextFocusKeybind = key.NewBinding(key.WithKeys("down"))
+
+	return w
+}
+
+func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, w.focusManager.PreviousFocusKeybind):
+			w.PreviousItem()
+
+		case key.Matches(msg, w.focusManager.NextFocusKeybind):
+			w.NextItem()
+
+		}
+	}
+
+	cmd := w.focusManager.Update(msg)
+
+	w.focusManager.Focus(w.globalIndex)
+
+	return cmd
+}
+
+func (w *Widget[T]) Resize(size orvyn.Size) {
+	var perPage int
+
+	maxItemHeight := 0
+
+	w.BaseWidget.Resize(size)
+
+	for _, li := range w.listItems {
+		li.Resize(size)
+
+		maxItemHeight = max(maxItemHeight, li.GetSize().Height)
+	}
+
+	perPage = size.Height / maxItemHeight
+
+	w.paginator.PerPage = perPage
+	w.paginator.SetTotalPages(len(w.listItems))
+}
+
+func (w *Widget[T]) Render() string {
+	var b strings.Builder
+
+	// perPage := w.paginator.PerPage
+	count := 0
+	start, end := w.paginator.GetSliceBounds(len(w.listItems))
+
+	for i, li := range w.listItems[start:end] {
+		if i > 0 {
+			b.WriteString("\n")
+		}
+
+		b.WriteString(li.Render())
+
+		count++
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Center, b.String(), w.paginator.View())
+}
+
+func (w *Widget[T]) OnFocus() {}
+
+func (w *Widget[T]) OnBlur() {}
+
+func (w *Widget[T]) OnEnterInput() {}
+
+func (w *Widget[T]) OnExitInput() {}
+
+// Public API
+
+// PreviousItem manages the focus of the previous item.
+func (w *Widget[T]) PreviousItem() {
+	w.cursor--
+	w.globalIndex--
+
+	if w.cursor < 0 && w.paginator.Page == 0 {
+		if w.InfiniteScroll {
+			w.paginator.Page = w.paginator.TotalPages - 1
+			w.cursor = w.paginator.ItemsOnPage(len(w.items)) - 1
+			w.globalIndex = len(w.items) - 1
+			return
+		}
+
+		w.cursor = 0
+		w.globalIndex = 0
+		return
+	}
+
+	if w.cursor >= 0 {
+		return
+	}
+
+	w.paginator.PrevPage()
+	w.cursor = w.paginator.ItemsOnPage(len(w.items)) - 1
+}
+
+// NextItem manages the focus of the next item.
+func (w *Widget[T]) NextItem() {
+	itemsOnPage := w.paginator.ItemsOnPage(len(w.items))
+
+	w.cursor++
+	w.globalIndex++
+
+	if w.cursor >= itemsOnPage && w.paginator.OnLastPage() {
+		if w.InfiniteScroll {
+			w.paginator.Page = 0
+			w.cursor = 0
+			w.globalIndex = 0
+			return
+		}
+
+		w.cursor = itemsOnPage - 1
+		w.globalIndex = len(w.items) - 1
+		return
+	}
+
+	if w.cursor <= itemsOnPage-1 {
+		return
+	}
+
+	w.paginator.NextPage()
+	w.cursor = 0
+}
+
+// SetItems takes a []T (slice of data) and instantiate all items
+// based on it.
+func (w *Widget[T]) SetItems(items []T) {
+	w.items = items
+
+	w.listItems = make([]IListItem, 0)
+	focusableList := make([]orvyn.Focusable, 0)
+
+	for _, i := range w.items {
+		item := w.itemConstructor(i)
+		w.listItems = append(w.listItems,
+			item)
+		focusableList = append(focusableList,
+			item)
+	}
+
+	w.focusManager.SetWidgets(focusableList)
+}
