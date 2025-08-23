@@ -60,10 +60,6 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 
 	w.paginator = paginator.New()
 	w.paginator.Type = paginator.Dots
-	w.paginator.ActiveDot = orvyn.GetTheme().
-		Style(theme.FocusedWidgetStyleName).Render("•")
-	w.paginator.InactiveDot = orvyn.GetTheme().
-		Style(theme.BlurredWidgetStyleName).Render("•")
 
 	w.focusManager = orvyn.NewFocusManager()
 	w.focusManager.ManageFocusNextPrevKeybind = false

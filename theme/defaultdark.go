@@ -15,7 +15,7 @@ func (d DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
 	case TitleStyleName:
 		s = s.Bold(true).Foreground(d.Color(TitleFontColorName))
 
-	case NormalTextName:
+	case NormalTextStyleName:
 		s = s.Foreground(d.Color(NormalFontColorName))
 
 	case FocusedWidgetStyleName:
@@ -26,6 +26,11 @@ func (d DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
 		s = s.Border(lipgloss.RoundedBorder()).
 			BorderForeground(d.Color(BlurredBorderColorName))
 
+	case PaginatorActiveStyleName:
+		s = s.Bold(true).Foreground(d.Color(NormalFontColorName))
+
+	case PaginatorInactiveStyleName:
+		s = s.Foreground(d.Color(DimFontColorName))
 	}
 
 	return s
@@ -35,7 +40,7 @@ func (d DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
 	var colorHexCode string
 
 	switch color {
-	case BlurredBorderColorName, BlurredFontColorName:
+	case BlurredBorderColorName, BlurredFontColorName, DimFontColorName:
 		colorHexCode = "#186318"
 
 	default:
