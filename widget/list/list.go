@@ -60,13 +60,17 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 
 	w.paginator = paginator.New()
 	w.paginator.Type = paginator.Dots
-	w.paginator.ActiveDot = lipgloss.NewStyle().Render("•")
-	w.paginator.InactiveDot = lipgloss.NewStyle().Render("•")
+	w.paginator.ActiveDot = orvyn.GetTheme().
+		Style(theme.FocusedWidgetStyleName).Render("•")
+	w.paginator.InactiveDot = orvyn.GetTheme().
+		Style(theme.BlurredWidgetStyleName).Render("•")
 
 	w.focusManager = orvyn.NewFocusManager()
 	w.focusManager.ManageFocusNextPrevKeybind = false
 	w.focusManager.PreviousFocusKeybind = key.NewBinding(key.WithKeys("up"))
 	w.focusManager.NextFocusKeybind = key.NewBinding(key.WithKeys("down"))
+
+	w.OnBlur()
 
 	return w
 }
