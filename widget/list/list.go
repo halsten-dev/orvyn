@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/theme"
+	"github.com/halsten-dev/orvyn/widget"
 )
 
 type IListItem interface {
@@ -140,10 +141,14 @@ func (w *Widget[T]) Render() string {
 
 func (w *Widget[T]) OnFocus() {
 	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleName)
+
+	widget.UpdatePaginatorTheme(&w.paginator)
 }
 
 func (w *Widget[T]) OnBlur() {
 	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleName)
+
+	widget.UpdatePaginatorTheme(&w.paginator)
 }
 
 func (w *Widget[T]) OnEnterInput() {}
