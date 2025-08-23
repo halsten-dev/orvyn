@@ -1,9 +1,8 @@
 package list
 
 import (
-	"farental/internal/orvyn"
-	"farental/style"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn"
 )
 
 type SimpleListItem struct {
@@ -21,7 +20,7 @@ func SimpleListItemConstructor(value string) IListItem {
 
 	sli.value = value
 
-	sli.style = style.BlurredStyle
+	sli.style = lipgloss.NewStyle()
 
 	return sli
 }
@@ -42,11 +41,11 @@ func (s *SimpleListItem) Render() string {
 }
 
 func (s *SimpleListItem) OnFocus() {
-	s.style = style.FocusedStyle
+	s.style = lipgloss.NewStyle().Bold(true)
 }
 
 func (s *SimpleListItem) OnBlur() {
-	s.style = style.BlurredStyle
+	s.style = lipgloss.NewStyle().Italic(true)
 }
 
 func (s *SimpleListItem) OnEnterInput() {}
