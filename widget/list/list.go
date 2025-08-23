@@ -41,6 +41,8 @@ type Widget[T any] struct {
 	itemConstructor ItemConstructor[T]
 
 	style lipgloss.Style
+
+	contentSize orvyn.Size
 }
 
 // New creates a new *Widget list and takes an itemConstructor as parameter.
@@ -96,6 +98,9 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 	w.BaseWidget.Resize(size)
 
+	size.Width -= w.style.GetHorizontalFrameSize()
+	size.Height -= w.style.GetVerticalFrameSize()
+
 	for _, li := range w.listItems {
 		li.Resize(size)
 
@@ -106,6 +111,8 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 	w.paginator.PerPage = perPage
 	w.paginator.SetTotalPages(len(w.listItems))
+
+	w.contentSize = size
 }
 
 func (w *Widget[T]) Render() string {
@@ -125,7 +132,10 @@ func (w *Widget[T]) Render() string {
 		count++
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Center, b.String(), w.paginator.View())
+	return w.style.
+		Width(w.contentSize.Width).
+		Height(w.contentSize.Height).
+		Render(lipgloss.JoinVertical(lipgloss.Center, b.String(), w.paginator.View()))
 }
 
 func (w *Widget[T]) OnFocus() {

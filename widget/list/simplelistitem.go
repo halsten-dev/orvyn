@@ -21,7 +21,7 @@ func SimpleListItemConstructor(value string) IListItem {
 
 	sli.value = value
 
-	sli.style = lipgloss.NewStyle()
+	sli.OnBlur()
 
 	return sli
 }
