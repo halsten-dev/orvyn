@@ -1,4 +1,4 @@
-package orvyn
+package theme
 
 import "github.com/charmbracelet/lipgloss"
 
