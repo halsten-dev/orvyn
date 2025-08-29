@@ -44,6 +44,8 @@ type Widget[T any] struct {
 	style lipgloss.Style
 
 	contentSize orvyn.Size
+
+	CursorMovedCallback func(int)
 }
 
 // New creates a new *Widget list and takes an itemConstructor as parameter.
@@ -80,8 +82,16 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 		case key.Matches(msg, w.focusManager.PreviousFocusKeybind):
 			w.PreviousItem()
 
+			if w.CursorMovedCallback != nil {
+				w.CursorMovedCallback(w.globalIndex)
+			}
+
 		case key.Matches(msg, w.focusManager.NextFocusKeybind):
 			w.NextItem()
+
+			if w.CursorMovedCallback != nil {
+				w.CursorMovedCallback(w.globalIndex)
+			}
 
 		}
 	}
