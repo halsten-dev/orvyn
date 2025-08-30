@@ -36,7 +36,7 @@ var (
 func Init() {
 	ExitKeybind = key.NewBinding(key.WithKeys("ctrl+c"))
 	ProcessExit = true
-	WindowSize = NewSize(10, 10)
+	WindowSize = NewSize(100, 100)
 	screens = make(map[ScreenID]Screen)
 	activeTheme = theme.DefaultDarkTheme{}
 }
