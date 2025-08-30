@@ -13,14 +13,15 @@ import (
 	"github.com/halsten-dev/orvyn/widget"
 )
 
-type IListItem interface {
+type IListItem[T any] interface {
 	orvyn.Focusable
 	orvyn.Renderable
+	GetData() T
 }
 
 // ItemConstructor defines the signature of the item constructor.
 // T type represents the type of the item data.
-type ItemConstructor[T any] func(T) IListItem
+type ItemConstructor[T any] func(T) IListItem[T]
 
 // Widget defines a list widget.
 // T type represents the type of the item data.
@@ -33,7 +34,7 @@ type Widget[T any] struct {
 	cursor      int
 	globalIndex int
 
-	listItems []IListItem
+	listItems []IListItem[T]
 	items     []T
 
 	paginator paginator.Model
@@ -263,7 +264,7 @@ func (w *Widget[T]) GetGlobalIndex() int {
 func (w *Widget[T]) SetItems(items []T) {
 	w.items = items
 
-	w.listItems = make([]IListItem, 0)
+	w.listItems = make([]IListItem[T], 0)
 	focusableList := make([]orvyn.Focusable, 0)
 
 	for _, i := range w.items {
@@ -275,6 +276,18 @@ func (w *Widget[T]) SetItems(items []T) {
 	}
 
 	w.focusManager.SetWidgets(focusableList)
+}
+
+func (w *Widget[T]) GetItems() []T {
+	var items []T
+
+	items = make([]T, 0)
+
+	for _, item := range w.listItems {
+		items = append(items, item.GetData())
+	}
+
+	return items
 }
 
 func (w *Widget[T]) FocusItem(index int) {

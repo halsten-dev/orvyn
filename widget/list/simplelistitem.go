@@ -14,7 +14,7 @@ type SimpleListItem struct {
 	value string
 }
 
-func SimpleListItemConstructor(value string) IListItem {
+func SimpleListItemConstructor(value string) IListItem[string] {
 	sli := new(SimpleListItem)
 
 	sli.BaseWidget = orvyn.NewBaseWidget()
@@ -52,3 +52,7 @@ func (s *SimpleListItem) OnBlur() {
 func (s *SimpleListItem) OnEnterInput() {}
 
 func (s *SimpleListItem) OnExitInput() {}
+
+func (s *SimpleListItem) GetData() string {
+	return s.value
+}
