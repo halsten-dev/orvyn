@@ -254,6 +254,10 @@ func (w *Widget[T]) moveCursor(index int) {
 	w.cursor = cursor
 }
 
+func (w *Widget[T]) GetGlobalIndex() int {
+	return w.globalIndex
+}
+
 // SetItems takes a []T (slice of data) and instantiate all items
 // based on it.
 func (w *Widget[T]) SetItems(items []T) {
