@@ -181,6 +181,16 @@ func (w *Widget[T]) OnEnterInput() {}
 
 func (w *Widget[T]) OnExitInput() {}
 
+func (w *Widget[T]) IsInputting() bool {
+	inputting := w.checkInputting()
+
+	if inputting {
+		return true
+	}
+
+	return w.BaseFocusable.IsInputting()
+}
+
 func (w *Widget[T]) checkInputting() bool {
 	for _, item := range w.listItems {
 		if item.IsInputting() {
