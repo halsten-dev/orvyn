@@ -76,23 +76,27 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 }
 
 func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, w.focusManager.PreviousFocusKeybind):
-			w.PreviousItem()
+	isInputting := w.checkInputting()
 
-			if w.CursorMovedCallback != nil {
-				w.CursorMovedCallback(w.globalIndex)
+	if !isInputting {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch {
+			case key.Matches(msg, w.focusManager.PreviousFocusKeybind):
+				w.PreviousItem()
+
+				if w.CursorMovedCallback != nil {
+					w.CursorMovedCallback(w.globalIndex)
+				}
+
+			case key.Matches(msg, w.focusManager.NextFocusKeybind):
+				w.NextItem()
+
+				if w.CursorMovedCallback != nil {
+					w.CursorMovedCallback(w.globalIndex)
+				}
+
 			}
-
-		case key.Matches(msg, w.focusManager.NextFocusKeybind):
-			w.NextItem()
-
-			if w.CursorMovedCallback != nil {
-				w.CursorMovedCallback(w.globalIndex)
-			}
-
 		}
 	}
 
@@ -176,6 +180,16 @@ func (w *Widget[T]) OnBlur() {
 func (w *Widget[T]) OnEnterInput() {}
 
 func (w *Widget[T]) OnExitInput() {}
+
+func (w *Widget[T]) checkInputting() bool {
+	for _, item := range w.listItems {
+		if item.IsInputting() {
+			return true
+		}
+	}
+
+	return false
+}
 
 // Public API
 
