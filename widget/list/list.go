@@ -120,6 +120,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	}
 
 	perPage = size.Height / maxItemHeight
+	perPage = max(perPage, 1)
 
 	w.paginator.PerPage = perPage
 	w.paginator.SetTotalPages(len(w.listItems))
