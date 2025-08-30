@@ -119,7 +119,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 		maxItemHeight = max(maxItemHeight, li.GetSize().Height)
 	}
 
-	perPage = size.Height / maxItemHeight
+	perPage = (size.Height - 1) / maxItemHeight
 	perPage = max(perPage, 1)
 
 	w.paginator.PerPage = perPage
@@ -130,6 +130,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 func (w *Widget[T]) Render() string {
 	var b strings.Builder
+	var view string
 
 	count := 0
 	start, end := w.paginator.GetSliceBounds(len(w.listItems))
@@ -144,12 +145,20 @@ func (w *Widget[T]) Render() string {
 		count++
 	}
 
+	if w.paginator.TotalPages > 1 {
+		view = lipgloss.JoinVertical(
+			lipgloss.Center, b.String(),
+			w.paginator.View())
+	} else {
+		view = lipgloss.JoinVertical(
+			lipgloss.Center, b.String(),
+		)
+	}
+
 	return w.style.
 		Width(w.contentSize.Width).
 		Height(w.contentSize.Height).
-		Render(lipgloss.JoinVertical(
-			lipgloss.Center, b.String(),
-			w.paginator.View()))
+		Render(view)
 }
 
 func (w *Widget[T]) OnFocus() {
