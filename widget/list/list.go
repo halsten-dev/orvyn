@@ -255,3 +255,7 @@ func (w *Widget[T]) SetItems(items []T) {
 func (w *Widget[T]) FocusItem(index int) {
 	w.focusManager.Focus(index)
 }
+
+func (w *Widget[T]) BlurCurrent() {
+	w.focusManager.BlurCurrent()
+}
