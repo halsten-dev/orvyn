@@ -251,3 +251,7 @@ func (w *Widget[T]) SetItems(items []T) {
 
 	w.focusManager.SetWidgets(focusableList)
 }
+
+func (w *Widget[T]) FocusItem(index int) {
+	w.focusManager.Focus(index)
+}
