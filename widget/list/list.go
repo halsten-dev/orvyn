@@ -246,7 +246,7 @@ func (w *Widget[T]) NextItem() {
 func (w *Widget[T]) moveCursor(index int) {
 	// based on the global index set the cursor and the current page.
 
-	itemsOnPage := w.paginator.ItemsOnPage(len(w.items))
+	itemsOnPage := w.paginator.PerPage
 
 	page := int(math.Floor(float64(index) / float64(itemsOnPage)))
 	cursor := index % itemsOnPage
