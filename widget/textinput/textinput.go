@@ -59,6 +59,8 @@ func (w *Widget) Render() string {
 }
 
 func (w *Widget) Resize(size orvyn.Size) {
+	size.Height = 1 + w.style.GetVerticalFrameSize()
+
 	w.BaseWidget.Resize(size)
 
 	// Take borders into account
