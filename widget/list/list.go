@@ -1,6 +1,7 @@
 package list
 
 import (
+	"math"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -205,56 +206,52 @@ func (w *Widget[T]) checkInputting() bool {
 
 // PreviousItem manages the focus of the previous item.
 func (w *Widget[T]) PreviousItem() {
-	w.cursor--
 	w.globalIndex--
 
-	if w.cursor < 0 && w.paginator.Page == 0 {
+	if w.globalIndex < 0 {
 		if w.InfiniteScroll {
-			w.paginator.Page = w.paginator.TotalPages - 1
-			w.cursor = w.paginator.ItemsOnPage(len(w.items)) - 1
 			w.globalIndex = len(w.items) - 1
+			w.moveCursor(w.globalIndex)
 			return
 		}
 
-		w.cursor = 0
 		w.globalIndex = 0
+		w.moveCursor(0)
 		return
 	}
 
-	if w.cursor >= 0 {
-		return
-	}
-
-	w.paginator.PrevPage()
-	w.cursor = w.paginator.ItemsOnPage(len(w.items)) - 1
+	w.moveCursor(w.globalIndex)
 }
 
 // NextItem manages the focus of the next item.
 func (w *Widget[T]) NextItem() {
-	itemsOnPage := w.paginator.ItemsOnPage(len(w.items))
-
-	w.cursor++
 	w.globalIndex++
 
-	if w.cursor >= itemsOnPage && w.paginator.OnLastPage() {
+	if w.globalIndex > len(w.items)-1 {
 		if w.InfiniteScroll {
-			w.paginator.Page = 0
-			w.cursor = 0
 			w.globalIndex = 0
+			w.moveCursor(0)
 			return
 		}
 
-		w.cursor = itemsOnPage - 1
 		w.globalIndex = len(w.items) - 1
+		w.moveCursor(w.globalIndex)
 		return
 	}
 
-	if w.cursor <= itemsOnPage-1 {
-		return
-	}
+	w.moveCursor(w.globalIndex)
+}
 
-	w.paginator.NextPage()
-	w.cursor = 0
+func (w *Widget[T]) moveCursor(index int) {
+	// based on the global index set the cursor and the current page.
+
+	itemsOnPage := w.paginator.ItemsOnPage(len(w.items))
+
+	page := int(math.Floor(float64(index) / float64(itemsOnPage)))
+	cursor := index % itemsOnPage
+
+	w.paginator.Page = page
+	w.cursor = cursor
 }
 
 // SetItems takes a []T (slice of data) and instantiate all items
@@ -278,6 +275,8 @@ func (w *Widget[T]) SetItems(items []T) {
 
 func (w *Widget[T]) FocusItem(index int) {
 	w.focusManager.Focus(index)
+	w.globalIndex = index
+	w.moveCursor(index)
 }
 
 func (w *Widget[T]) BlurCurrent() {
