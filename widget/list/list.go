@@ -207,6 +207,10 @@ func (w *Widget[T]) checkInputting() bool {
 
 // PreviousItem manages the focus of the previous item.
 func (w *Widget[T]) PreviousItem() {
+	if len(w.listItems) == 0 {
+		return
+	}
+
 	w.globalIndex--
 
 	if w.globalIndex < 0 {
@@ -226,6 +230,10 @@ func (w *Widget[T]) PreviousItem() {
 
 // NextItem manages the focus of the next item.
 func (w *Widget[T]) NextItem() {
+	if len(w.listItems) == 0 {
+		return
+	}
+
 	w.globalIndex++
 
 	if w.globalIndex > len(w.items)-1 {
