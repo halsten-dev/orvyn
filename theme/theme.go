@@ -9,13 +9,16 @@ type StyleID uint
 const (
 	TitleStyleID StyleID = iota
 	NormalTextStyleID
+	LabelTextStyleID
 	FocusedWidgetStyleID
 	BlurredWidgetStyleID
 	PaginatorActiveStyleID
 	PaginatorInactiveStyleID
-	TextInputTextStyleID
-	TextInputCursorStyleID
-	TextInputCursorTextStyleID
+	StatusErrorTextStyleID
+	StatusSuccessTextStyleID
+	StatusWarningTextStyleID
+	StatusInformationTextStyleID
+	StatusNeutralTextStyleID
 )
 
 type ColorID uint
@@ -28,6 +31,11 @@ const (
 	FocusedFontColorID
 	BlurredBorderColorID
 	BlurredFontColorID
+	StatusErrorFontColorID
+	StatusSuccessFontColorID
+	StatusWarningFontColorID
+	StatusInformationFontColorID
+	StatusNeutralFontColorID
 )
 
 type SizeID string

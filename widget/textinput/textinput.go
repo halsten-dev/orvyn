@@ -99,7 +99,7 @@ func (w *Widget) updateStyle(focused bool) {
 		w.style = t.Style(theme.BlurredWidgetStyleID)
 	}
 
-	w.TextStyle = t.Style(theme.TextInputTextStyleID)
-	w.Cursor.Style = t.Style(theme.TextInputCursorStyleID)
-	w.Cursor.TextStyle = t.Style(theme.TextInputCursorTextStyleID)
+	w.TextStyle = t.Style(theme.NormalTextStyleID)
+	w.Cursor.Style = t.Style(theme.NormalTextStyleID)
+	w.Cursor.TextStyle = t.Style(theme.NormalTextStyleID)
 }
