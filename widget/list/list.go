@@ -112,7 +112,7 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 func (w *Widget[T]) Resize(size orvyn.Size) {
 	var perPage int
 
-	maxItemHeight := 0
+	maxItemHeight := 1
 
 	w.BaseWidget.Resize(size)
 
