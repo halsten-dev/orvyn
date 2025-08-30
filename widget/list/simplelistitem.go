@@ -56,3 +56,7 @@ func (s *SimpleListItem) OnExitInput() {}
 func (s *SimpleListItem) GetData() string {
 	return s.value
 }
+
+func (s *SimpleListItem) FilterValue() string {
+	return s.value
+}

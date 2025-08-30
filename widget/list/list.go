@@ -1,6 +1,7 @@
 package list
 
 import (
+	"github.com/halsten-dev/orvyn/widget/textinput"
 	"math"
 	"strings"
 
@@ -17,6 +18,7 @@ type IListItem[T any] interface {
 	orvyn.Focusable
 	orvyn.Renderable
 	GetData() T
+	FilterValue() string
 }
 
 // ItemConstructor defines the signature of the item constructor.
@@ -30,12 +32,15 @@ type Widget[T any] struct {
 	orvyn.BaseFocusable
 
 	InfiniteScroll bool
+	filterable     bool
 
 	cursor      int
 	globalIndex int
 
 	listItems []IListItem[T]
 	items     []T
+
+	tiFilter *textinput.Widget
 
 	paginator paginator.Model
 
@@ -60,8 +65,12 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.itemConstructor = itemConstructor
 
 	w.InfiniteScroll = false
+	w.filterable = true
 
 	w.cursor = 0
+
+	w.tiFilter = textinput.New()
+	w.tiFilter.Placeholder = "Press '/' to filter"
 
 	w.paginator = paginator.New()
 	w.paginator.Type = paginator.Dots
@@ -119,13 +128,21 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	size.Width -= w.style.GetHorizontalFrameSize()
 	size.Height -= w.style.GetVerticalFrameSize()
 
+	w.tiFilter.Resize(size)
+
 	for _, li := range w.listItems {
 		li.Resize(size)
 
 		maxItemHeight = max(maxItemHeight, li.GetSize().Height)
 	}
 
-	perPage = (size.Height - 1) / maxItemHeight
+	calcHeight := size.Height - 1 // paginator
+
+	if w.filterable {
+		calcHeight -= w.tiFilter.GetSize().Height
+	}
+
+	perPage = calcHeight / maxItemHeight
 	perPage = max(perPage, 1)
 
 	w.paginator.PerPage = perPage
@@ -135,8 +152,11 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 }
 
 func (w *Widget[T]) Render() string {
+	var elements []string
 	var b strings.Builder
 	var view string
+
+	elements = make([]string, 0)
 
 	count := 0
 	start, end := w.paginator.GetSliceBounds(len(w.listItems))
@@ -151,15 +171,18 @@ func (w *Widget[T]) Render() string {
 		count++
 	}
 
-	if w.paginator.TotalPages > 1 {
-		view = lipgloss.JoinVertical(
-			lipgloss.Center, b.String(),
-			w.paginator.View())
-	} else {
-		view = lipgloss.JoinVertical(
-			lipgloss.Center, b.String(),
-		)
+	if w.filterable {
+		elements = append(elements, w.tiFilter.Render())
 	}
+
+	elements = append(elements, b.String())
+
+	if w.paginator.TotalPages > 1 {
+		elements = append(elements, w.paginator.View())
+	}
+
+	view = lipgloss.JoinVertical(lipgloss.Center,
+		elements...)
 
 	return w.style.
 		Width(w.contentSize.Width).
@@ -261,6 +284,15 @@ func (w *Widget[T]) moveCursor(index int) {
 
 	w.paginator.Page = page
 	w.cursor = cursor
+}
+
+func (w *Widget[T]) SetFilterable(filterable bool) {
+	w.filterable = filterable
+	w.tiFilter.SetActive(filterable)
+}
+
+func (w *Widget[T]) SetFilterPlaceholder(s string) {
+	w.tiFilter.Placeholder = s
 }
 
 func (w *Widget[T]) GetGlobalIndex() int {
