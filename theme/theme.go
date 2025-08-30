@@ -4,33 +4,36 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type StyleName uint
+type StyleID uint
 
 const (
-	TitleStyleName StyleName = iota
-	NormalTextStyleName
-	FocusedWidgetStyleName
-	BlurredWidgetStyleName
-	PaginatorActiveStyleName
-	PaginatorInactiveStyleName
+	TitleStyleID StyleID = iota
+	NormalTextStyleID
+	FocusedWidgetStyleID
+	BlurredWidgetStyleID
+	PaginatorActiveStyleID
+	PaginatorInactiveStyleID
+	TextInputTextStyleID
+	TextInputCursorStyleID
+	TextInputCursorTextStyleID
 )
 
-type ColorName uint
+type ColorID uint
 
 const (
-	TitleFontColorName ColorName = iota
-	NormalFontColorName
-	DimFontColorName
-	FocusedBorderColorName
-	FocusedFontColorName
-	BlurredBorderColorName
-	BlurredFontColorName
+	TitleFontColorID ColorID = iota
+	NormalFontColorID
+	DimFontColorID
+	FocusedBorderColorID
+	FocusedFontColorID
+	BlurredBorderColorID
+	BlurredFontColorID
 )
 
-type SizeName string
+type SizeID string
 
 type Theme interface {
-	Style(StyleName) lipgloss.Style
-	Color(ColorName) lipgloss.Color
-	Size(SizeName) int
+	Style(StyleID) lipgloss.Style
+	Color(ColorID) lipgloss.Color
+	Size(SizeID) int
 }

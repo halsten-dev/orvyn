@@ -42,11 +42,11 @@ func (s *SimpleListItem) Render() string {
 }
 
 func (s *SimpleListItem) OnFocus() {
-	s.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleName)
+	s.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
 }
 
 func (s *SimpleListItem) OnBlur() {
-	s.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleName)
+	s.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
 }
 
 func (s *SimpleListItem) OnEnterInput() {}

@@ -8,7 +8,7 @@ import (
 
 func UpdatePaginatorTheme(paginator *paginator.Model) {
 	paginator.ActiveDot = orvyn.GetTheme().
-		Style(theme.PaginatorActiveStyleName).Render("•")
+		Style(theme.PaginatorActiveStyleID).Render("•")
 	paginator.InactiveDot = orvyn.GetTheme().
-		Style(theme.PaginatorInactiveStyleName).Render("•")
+		Style(theme.PaginatorInactiveStyleID).Render("•")
 }

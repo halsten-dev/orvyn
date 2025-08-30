@@ -95,6 +95,10 @@ func GetTheme() theme.Theme {
 	return activeTheme
 }
 
+func SetTheme(theme theme.Theme) {
+	activeTheme = theme
+}
+
 // Screen management
 
 // RegisterScreen allows to register a Screen with the given ScreenID.

@@ -6,41 +6,41 @@ import (
 
 type DefaultDarkTheme struct{}
 
-func (d DefaultDarkTheme) Style(style StyleName) lipgloss.Style {
+func (d DefaultDarkTheme) Style(style StyleID) lipgloss.Style {
 	var s lipgloss.Style
 
 	s = lipgloss.NewStyle()
 
 	switch style {
-	case TitleStyleName:
-		s = s.Bold(true).Foreground(d.Color(TitleFontColorName))
+	case TitleStyleID:
+		s = s.Bold(true).Foreground(d.Color(TitleFontColorID))
 
-	case NormalTextStyleName:
-		s = s.Foreground(d.Color(NormalFontColorName))
+	case NormalTextStyleID:
+		s = s.Foreground(d.Color(NormalFontColorID))
 
-	case FocusedWidgetStyleName:
+	case FocusedWidgetStyleID:
 		s = s.Border(lipgloss.RoundedBorder()).
-			BorderForeground(d.Color(FocusedBorderColorName))
+			BorderForeground(d.Color(FocusedBorderColorID))
 
-	case BlurredWidgetStyleName:
+	case BlurredWidgetStyleID:
 		s = s.Border(lipgloss.RoundedBorder()).
-			BorderForeground(d.Color(BlurredBorderColorName))
+			BorderForeground(d.Color(BlurredBorderColorID))
 
-	case PaginatorActiveStyleName:
-		s = s.Bold(true).Foreground(d.Color(NormalFontColorName))
+	case PaginatorActiveStyleID:
+		s = s.Bold(true).Foreground(d.Color(NormalFontColorID))
 
-	case PaginatorInactiveStyleName:
-		s = s.Foreground(d.Color(DimFontColorName))
+	case PaginatorInactiveStyleID:
+		s = s.Foreground(d.Color(DimFontColorID))
 	}
 
 	return s
 }
 
-func (d DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
+func (d DefaultDarkTheme) Color(color ColorID) lipgloss.Color {
 	var colorHexCode string
 
 	switch color {
-	case BlurredBorderColorName, BlurredFontColorName, DimFontColorName:
+	case BlurredBorderColorID, BlurredFontColorID, DimFontColorID:
 		colorHexCode = "#186318"
 
 	default:
@@ -51,6 +51,6 @@ func (d DefaultDarkTheme) Color(color ColorName) lipgloss.Color {
 	return lipgloss.Color(colorHexCode)
 }
 
-func (d DefaultDarkTheme) Size(size SizeName) int {
+func (d DefaultDarkTheme) Size(size SizeID) int {
 	return 0
 }

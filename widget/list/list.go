@@ -162,13 +162,13 @@ func (w *Widget[T]) Render() string {
 }
 
 func (w *Widget[T]) OnFocus() {
-	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleName)
+	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
 
 	widget.UpdatePaginatorTheme(&w.paginator)
 }
 
 func (w *Widget[T]) OnBlur() {
-	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleName)
+	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
 
 	widget.UpdatePaginatorTheme(&w.paginator)
 }
