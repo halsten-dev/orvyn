@@ -95,21 +95,21 @@ func (f *FocusManager) FocusFirst() {
 
 // BlurCurrent simply blur the currently focused widget
 func (f *FocusManager) BlurCurrent() {
-	if f.tabIndex >= 0 && f.tabIndex <= len(f.widgets) {
+	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.blur(f.tabIndex)
 	}
 }
 
 // ForceInput forces the widget to enter input
 func (f *FocusManager) ForceInput(index int) {
-	if f.tabIndex >= 0 && f.tabIndex <= len(f.widgets) {
+	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.enterInput(f.tabIndex)
 	}
 }
 
 // ExitCurrentInput simply exits the currently inputting widget
 func (f *FocusManager) ExitCurrentInput() {
-	if f.tabIndex >= 0 && f.tabIndex <= len(f.widgets) {
+	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.exitInput(f.tabIndex)
 	}
 }
