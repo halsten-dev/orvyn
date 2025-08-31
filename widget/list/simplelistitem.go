@@ -11,10 +11,10 @@ type SimpleListItem struct {
 	orvyn.BaseFocusable
 	style lipgloss.Style
 
-	value string
+	value *string
 }
 
-func SimpleListItemConstructor(value string) IListItem[string] {
+func SimpleListItemConstructor(value *string) IListItem {
 	sli := new(SimpleListItem)
 
 	sli.BaseWidget = orvyn.NewBaseWidget()
@@ -28,7 +28,7 @@ func SimpleListItemConstructor(value string) IListItem[string] {
 
 func (s *SimpleListItem) Resize(size orvyn.Size) {
 	size.Width -= s.style.GetHorizontalFrameSize()
-	size.Height = lipgloss.Height(s.style.Render(s.value))
+	size.Height = lipgloss.Height(s.style.Render(*s.value))
 
 	s.BaseWidget.Resize(size)
 }
@@ -38,7 +38,7 @@ func (s *SimpleListItem) Render() string {
 
 	return s.style.
 		Width(size.Width).
-		Render(s.value)
+		Render(*s.value)
 }
 
 func (s *SimpleListItem) OnFocus() {
@@ -53,10 +53,6 @@ func (s *SimpleListItem) OnEnterInput() {}
 
 func (s *SimpleListItem) OnExitInput() {}
 
-func (s *SimpleListItem) GetData() string {
-	return s.value
-}
-
 func (s *SimpleListItem) FilterValue() string {
-	return s.value
+	return *s.value
 }

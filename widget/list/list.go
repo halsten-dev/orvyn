@@ -14,16 +14,50 @@ import (
 	"github.com/halsten-dev/orvyn/widget"
 )
 
-type IListItem[T any] interface {
+type IListItem interface {
 	orvyn.Focusable
 	orvyn.Renderable
-	GetData() T
 	FilterValue() string
 }
 
 // ItemConstructor defines the signature of the item constructor.
 // T type represents the type of the item data.
-type ItemConstructor[T any] func(T) IListItem[T]
+type ItemConstructor[T any] func(*T) IListItem
+
+type filteredItem struct {
+	index int // corresponding global index
+	item  *IListItem
+}
+
+type filteredItems []filteredItem
+
+// FilterState Taken from github.com/charmbracelet/bubbles/list/list.go
+// FilterState describes the current filtering state on the model.
+type FilterState int
+
+// Possible filter states.
+const (
+	Unfiltered    FilterState = iota // no filter set
+	Filtering                        // user is actively setting a filter
+	FilterApplied                    // a filter is applied and user is not editing filter
+)
+
+// String returns a human-readable string of the current filter state.
+func (f FilterState) String() string {
+	return [...]string{
+		"unfiltered",
+		"filtering",
+		"filter applied",
+	}[f]
+}
+
+type keybinds struct {
+	cursorUp    key.Binding
+	cursorDown  key.Binding
+	enterFilter key.Binding
+	clearFilter key.Binding
+	applyFilter key.Binding
+}
 
 // Widget defines a list widget.
 // T type represents the type of the item data.
@@ -33,12 +67,14 @@ type Widget[T any] struct {
 
 	InfiniteScroll bool
 	filterable     bool
+	FilterState    FilterState
 
 	cursor      int
 	globalIndex int
 
-	listItems []IListItem[T]
-	items     []T
+	listItems         []IListItem
+	filteredListItems filteredItems
+	items             []T
 
 	tiFilter *textinput.Widget
 
@@ -52,6 +88,8 @@ type Widget[T any] struct {
 
 	contentSize orvyn.Size
 
+	keybinds keybinds
+
 	CursorMovedCallback func(int)
 }
 
@@ -62,10 +100,19 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 
 	w.BaseWidget = orvyn.NewBaseWidget()
 
+	w.keybinds = keybinds{
+		cursorUp:    key.NewBinding(key.WithKeys("up")),
+		cursorDown:  key.NewBinding(key.WithKeys("down")),
+		enterFilter: key.NewBinding(key.WithKeys("/")),
+		applyFilter: key.NewBinding(key.WithKeys("enter")),
+		clearFilter: key.NewBinding(key.WithKeys("esc")),
+	}
+
 	w.itemConstructor = itemConstructor
 
 	w.InfiniteScroll = false
 	w.filterable = true
+	w.FilterState = Unfiltered
 
 	w.cursor = 0
 
@@ -77,8 +124,8 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 
 	w.focusManager = orvyn.NewFocusManager()
 	w.focusManager.ManageFocusNextPrevKeybind = false
-	w.focusManager.PreviousFocusKeybind = key.NewBinding(key.WithKeys("up"))
-	w.focusManager.NextFocusKeybind = key.NewBinding(key.WithKeys("down"))
+	w.focusManager.PreviousFocusKeybind = w.keybinds.cursorUp
+	w.focusManager.NextFocusKeybind = w.keybinds.cursorDown
 	w.focusManager.Focus(0)
 
 	w.OnBlur()
@@ -87,6 +134,27 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 }
 
 func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
+	if w.FilterState == Filtering {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch {
+			case key.Matches(msg, w.keybinds.applyFilter):
+				w.basicFilter(w.tiFilter.Value())
+
+				return nil
+
+			case key.Matches(msg, w.keybinds.clearFilter):
+				w.clearFilter()
+
+				return nil
+			}
+		}
+
+		cmd := w.tiFilter.Update(msg)
+
+		return cmd
+	}
+
 	isInputting := w.checkInputting()
 
 	if !isInputting {
@@ -107,6 +175,17 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 					w.CursorMovedCallback(w.globalIndex)
 				}
 
+			case key.Matches(msg, w.keybinds.enterFilter):
+				w.enterFilter()
+
+				return nil
+
+			case key.Matches(msg, w.keybinds.clearFilter):
+				if w.FilterState == FilterApplied {
+					w.clearFilter()
+
+					return nil
+				}
 			}
 		}
 	}
@@ -146,7 +225,12 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	perPage = max(perPage, 1)
 
 	w.paginator.PerPage = perPage
-	w.paginator.SetTotalPages(len(w.listItems))
+
+	if w.FilterState == FilterApplied {
+		w.paginator.SetTotalPages(len(w.filteredListItems))
+	} else {
+		w.paginator.SetTotalPages(len(w.listItems))
+	}
 
 	w.contentSize = size
 }
@@ -155,20 +239,31 @@ func (w *Widget[T]) Render() string {
 	var elements []string
 	var b strings.Builder
 	var view string
+	var start, end int
 
 	elements = make([]string, 0)
 
-	count := 0
-	start, end := w.paginator.GetSliceBounds(len(w.listItems))
+	if w.FilterState == FilterApplied {
+		start, end = w.paginator.GetSliceBounds(len(w.filteredListItems))
 
-	for i, li := range w.listItems[start:end] {
-		if i > 0 {
-			b.WriteString("\n")
+		for i, li := range w.filteredListItems[start:end] {
+			if i > 0 {
+				b.WriteString("\n")
+			}
+
+			item := *li.item
+			b.WriteString(item.Render())
 		}
+	} else {
+		start, end = w.paginator.GetSliceBounds(len(w.listItems))
 
-		b.WriteString(li.Render())
+		for i, li := range w.listItems[start:end] {
+			if i > 0 {
+				b.WriteString("\n")
+			}
 
-		count++
+			b.WriteString(li.Render())
+		}
 	}
 
 	if w.filterable {
@@ -234,6 +329,11 @@ func (w *Widget[T]) PreviousItem() {
 		return
 	}
 
+	if w.FilterState == FilterApplied {
+		w.previousFilteredItem()
+		return
+	}
+
 	w.globalIndex--
 
 	if w.globalIndex < 0 {
@@ -251,9 +351,45 @@ func (w *Widget[T]) PreviousItem() {
 	w.moveCursor(w.globalIndex)
 }
 
+func (w *Widget[T]) previousFilteredItem() {
+	if len(w.filteredListItems) == 0 {
+		return
+	}
+
+	w.cursor--
+
+	if w.cursor < 0 && w.paginator.Page == 0 {
+		if w.InfiniteScroll {
+			w.paginator.Page = w.paginator.TotalPages - 1
+			w.cursor = w.paginator.ItemsOnPage(len(w.filteredListItems)) - 1
+			w.globalIndex = w.getFilteredGlobalIndex()
+			return
+		}
+
+		w.cursor = 0
+		w.globalIndex = w.getFilteredGlobalIndex()
+		return
+	}
+
+	w.globalIndex = w.getFilteredGlobalIndex()
+
+	if w.cursor >= 0 {
+		return
+	}
+
+	w.paginator.PrevPage()
+	w.cursor = w.paginator.ItemsOnPage(len(w.filteredListItems)) - 1
+	w.globalIndex = w.getFilteredGlobalIndex()
+}
+
 // NextItem manages the focus of the next item.
 func (w *Widget[T]) NextItem() {
 	if len(w.listItems) == 0 {
+		return
+	}
+
+	if w.FilterState == FilterApplied {
+		w.nextFilteredItem()
 		return
 	}
 
@@ -272,6 +408,39 @@ func (w *Widget[T]) NextItem() {
 	}
 
 	w.moveCursor(w.globalIndex)
+}
+
+func (w *Widget[T]) nextFilteredItem() {
+	if len(w.filteredListItems) == 0 {
+		return
+	}
+
+	itemsOnPage := w.paginator.ItemsOnPage(len(w.filteredListItems))
+
+	w.cursor++
+
+	if w.cursor >= itemsOnPage && w.paginator.OnLastPage() {
+		if w.InfiniteScroll {
+			w.paginator.Page = 0
+			w.cursor = 0
+			w.globalIndex = w.getFilteredGlobalIndex()
+			return
+		}
+
+		w.cursor = itemsOnPage - 1
+		w.globalIndex = w.getFilteredGlobalIndex()
+		return
+	}
+
+	w.globalIndex = w.getFilteredGlobalIndex()
+
+	if w.cursor <= itemsOnPage-1 {
+		return
+	}
+
+	w.paginator.NextPage()
+	w.cursor = 0
+	w.globalIndex = w.getFilteredGlobalIndex()
 }
 
 func (w *Widget[T]) moveCursor(index int) {
@@ -304,11 +473,11 @@ func (w *Widget[T]) GetGlobalIndex() int {
 func (w *Widget[T]) SetItems(items []T) {
 	w.items = items
 
-	w.listItems = make([]IListItem[T], 0)
+	w.listItems = make([]IListItem, 0)
 	focusableList := make([]orvyn.Focusable, 0)
 
-	for _, i := range w.items {
-		item := w.itemConstructor(i)
+	for i := range w.items {
+		item := w.itemConstructor(&w.items[i])
 		w.listItems = append(w.listItems,
 			item)
 		focusableList = append(focusableList,
@@ -318,24 +487,91 @@ func (w *Widget[T]) SetItems(items []T) {
 	w.focusManager.SetWidgets(focusableList)
 }
 
-func (w *Widget[T]) GetItems() []T {
-	var items []T
-
-	items = make([]T, 0)
-
-	for _, item := range w.listItems {
-		items = append(items, item.GetData())
-	}
-
-	return items
+func (w *Widget[T]) SetCursorMovementKeybinds(cursorUp, cursorDown key.Binding) {
+	w.keybinds.cursorUp = cursorUp
+	w.keybinds.cursorDown = cursorDown
+	w.focusManager.PreviousFocusKeybind = cursorUp
+	w.focusManager.NextFocusKeybind = cursorDown
 }
 
-func (w *Widget[T]) FocusItem(index int) {
-	w.focusManager.Focus(index)
-	w.globalIndex = index
-	w.moveCursor(index)
+func (w *Widget[T]) GetItems() []T {
+	return w.items
+}
+
+func (w *Widget[T]) FocusFirst() {
+	w.focusManager.FocusFirst()
+
+	if w.FilterState == FilterApplied {
+		if len(w.filteredListItems) > 0 {
+			w.globalIndex = w.filteredListItems[0].index
+			w.cursor = 0
+			w.paginator.Page = 0
+		}
+	} else {
+		w.globalIndex = 0
+		w.moveCursor(w.globalIndex)
+	}
 }
 
 func (w *Widget[T]) BlurCurrent() {
 	w.focusManager.BlurCurrent()
+}
+
+func (w *Widget[T]) basicFilter(s string) {
+	if s == "" {
+		w.clearFilter()
+	}
+
+	w.tiFilter.OnBlur()
+
+	w.filteredListItems = make(filteredItems, 0)
+
+	for i, v := range w.listItems {
+		if strings.Contains(v.FilterValue(), s) {
+			w.filteredListItems = append(w.filteredListItems, filteredItem{
+				index: i,
+				item:  &w.listItems[i],
+			})
+			v.SetActive(true)
+			continue
+		}
+
+		v.SetActive(false)
+	}
+
+	w.FilterState = FilterApplied
+
+	w.paginator.SetTotalPages(max(len(w.filteredListItems), 1))
+
+	w.FocusFirst()
+}
+
+func (w *Widget[T]) clearFilter() {
+	w.tiFilter.SetValue("")
+	w.tiFilter.OnBlur()
+
+	w.filteredListItems = make(filteredItems, 0)
+
+	for _, v := range w.listItems {
+		v.SetActive(true)
+	}
+
+	w.FilterState = Unfiltered
+
+	w.paginator.SetTotalPages(len(w.listItems))
+
+	w.FocusFirst()
+}
+
+func (w *Widget[T]) enterFilter() {
+	w.focusManager.BlurCurrent()
+	w.tiFilter.OnFocus()
+	w.FilterState = Filtering
+
+	w.paginator.SetTotalPages(len(w.listItems))
+}
+
+func (w *Widget[T]) getFilteredGlobalIndex() int {
+	index := (w.paginator.Page * w.paginator.PerPage) + w.cursor
+	return w.filteredListItems[index].index
 }

@@ -81,6 +81,18 @@ func (f *FocusManager) Focus(index int) {
 	f.focus(f.tabIndex)
 }
 
+func (f *FocusManager) FocusFirst() {
+	f.BlurCurrent()
+
+	for i, item := range f.widgets {
+		if item.IsActive() {
+			f.tabIndex = i
+			f.focus(f.tabIndex)
+			return
+		}
+	}
+}
+
 // BlurCurrent simply blur the currently focused widget
 func (f *FocusManager) BlurCurrent() {
 	if f.tabIndex >= 0 && f.tabIndex <= len(f.widgets) {
