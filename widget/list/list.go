@@ -511,6 +511,11 @@ func (w *Widget[T]) FocusFirst() {
 		w.globalIndex = 0
 		w.moveCursor(w.globalIndex)
 	}
+
+	if w.CursorMovedCallback != nil {
+		w.CursorMovedCallback(w.globalIndex)
+	}
+
 }
 
 func (w *Widget[T]) BlurCurrent() {
