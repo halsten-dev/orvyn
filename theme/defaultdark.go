@@ -70,6 +70,9 @@ func (d DefaultDarkTheme) Color(color ColorID) lipgloss.Color {
 	var colorHexCode string
 
 	switch color {
+	case NeutralFontColorID:
+		colorHexCode = "#F5F5F5"
+
 	case BlurredBorderColorID, BlurredFontColorID, DimFontColorID:
 		colorHexCode = "#186318"
 
