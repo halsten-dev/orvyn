@@ -67,7 +67,7 @@ type Widget[T any] struct {
 
 	InfiniteScroll bool
 	filterable     bool
-	FilterState    FilterState
+	filterState    FilterState
 
 	cursor      int
 	globalIndex int
@@ -115,7 +115,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 
 	w.InfiniteScroll = false
 	w.filterable = true
-	w.FilterState = Unfiltered
+	w.filterState = Unfiltered
 
 	w.cursor = 0
 
@@ -140,7 +140,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 }
 
 func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
-	if w.FilterState == Filtering {
+	if w.filterState == Filtering {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch {
@@ -187,7 +187,7 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 				return nil
 
 			case key.Matches(msg, w.keybinds.clearFilter):
-				if w.FilterState == FilterApplied {
+				if w.filterState == FilterApplied {
 					w.clearFilter()
 
 					return nil
@@ -232,7 +232,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 	w.paginator.PerPage = perPage
 
-	if w.FilterState == FilterApplied {
+	if w.filterState == FilterApplied {
 		w.paginator.SetTotalPages(len(w.filteredListItems))
 	} else {
 		w.paginator.SetTotalPages(len(w.listItems))
@@ -249,7 +249,7 @@ func (w *Widget[T]) Render() string {
 
 	elements = make([]string, 0)
 
-	if w.FilterState == FilterApplied {
+	if w.filterState == FilterApplied {
 		start, end = w.paginator.GetSliceBounds(len(w.filteredListItems))
 
 		for i, li := range w.filteredListItems[start:end] {
@@ -343,7 +343,7 @@ func (w *Widget[T]) PreviousItem() {
 		return
 	}
 
-	if w.FilterState == FilterApplied {
+	if w.filterState == FilterApplied {
 		w.previousFilteredItem()
 		return
 	}
@@ -402,7 +402,7 @@ func (w *Widget[T]) NextItem() {
 		return
 	}
 
-	if w.FilterState == FilterApplied {
+	if w.filterState == FilterApplied {
 		w.nextFilteredItem()
 		return
 	}
@@ -515,7 +515,7 @@ func (w *Widget[T]) GetItems() []T {
 func (w *Widget[T]) FocusFirst() {
 	w.focusManager.FocusFirst()
 
-	if w.FilterState == FilterApplied {
+	if w.filterState == FilterApplied {
 		if len(w.filteredListItems) > 0 {
 			w.globalIndex = w.filteredListItems[0].index
 			w.cursor = 0
@@ -534,6 +534,10 @@ func (w *Widget[T]) FocusFirst() {
 
 func (w *Widget[T]) BlurCurrent() {
 	w.focusManager.BlurCurrent()
+}
+
+func (w *Widget[T]) FilterState() FilterState {
+	return w.filterState
 }
 
 func (w *Widget[T]) basicFilter(s string) {
@@ -558,7 +562,7 @@ func (w *Widget[T]) basicFilter(s string) {
 		v.SetActive(false)
 	}
 
-	w.FilterState = FilterApplied
+	w.filterState = FilterApplied
 
 	w.paginator.SetTotalPages(max(len(w.filteredListItems), 1))
 
@@ -575,7 +579,7 @@ func (w *Widget[T]) clearFilter() {
 		v.SetActive(true)
 	}
 
-	w.FilterState = Unfiltered
+	w.filterState = Unfiltered
 
 	w.paginator.SetTotalPages(len(w.listItems))
 
@@ -585,7 +589,7 @@ func (w *Widget[T]) clearFilter() {
 func (w *Widget[T]) enterFilter() {
 	w.focusManager.BlurCurrent()
 	w.tiFilter.OnFocus()
-	w.FilterState = Filtering
+	w.filterState = Filtering
 
 	w.paginator.SetTotalPages(len(w.listItems))
 }
