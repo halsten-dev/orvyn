@@ -18,6 +18,9 @@ func (d DefaultDarkTheme) Style(style StyleID) lipgloss.Style {
 	case NormalTextStyleID:
 		s = s.Foreground(d.Color(NormalFontColorID))
 
+	case HighlightTextStyleID:
+		s = s.Foreground(d.Color(HighlightFontColorID))
+
 	case DimTextStyleID:
 		s = s.Foreground(d.Color(DimFontColorID))
 
@@ -69,6 +72,9 @@ func (d DefaultDarkTheme) Color(color ColorID) lipgloss.Color {
 	switch color {
 	case BlurredBorderColorID, BlurredFontColorID, DimFontColorID:
 		colorHexCode = "#186318"
+
+	case HighlightFontColorID:
+		colorHexCode = "#C7FF37"
 
 	case StatusErrorFontColorID:
 		colorHexCode = "#DB0000"

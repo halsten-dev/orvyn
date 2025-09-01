@@ -9,6 +9,7 @@ type StyleID uint
 const (
 	TitleStyleID StyleID = iota
 	NormalTextStyleID
+	HighlightTextStyleID
 	DimTextStyleID
 	DimSecondaryTextStyleID
 	LabelTextStyleID
@@ -28,6 +29,7 @@ type ColorID uint
 const (
 	TitleFontColorID ColorID = iota
 	NormalFontColorID
+	HighlightFontColorID
 	DimFontColorID
 	FocusedBorderColorID
 	FocusedFontColorID
