@@ -38,7 +38,7 @@ const (
 	StatusNeutralFontColorID
 )
 
-type SizeID string
+type SizeID uint
 
 type Theme interface {
 	Style(StyleID) lipgloss.Style
