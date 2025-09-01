@@ -512,6 +512,10 @@ func (w *Widget[T]) GetItems() []T {
 	return w.items
 }
 
+func (w *Widget[T]) GetSelectedItem() T {
+	return w.items[w.globalIndex]
+}
+
 func (w *Widget[T]) FocusFirst() {
 	w.focusManager.FocusFirst()
 
