@@ -9,6 +9,8 @@ type StyleID uint
 const (
 	TitleStyleID StyleID = iota
 	NormalTextStyleID
+	DimTextStyleID
+	DimSecondaryTextStyleID
 	LabelTextStyleID
 	FocusedWidgetStyleID
 	BlurredWidgetStyleID

@@ -18,6 +18,12 @@ func (d DefaultDarkTheme) Style(style StyleID) lipgloss.Style {
 	case NormalTextStyleID:
 		s = s.Foreground(d.Color(NormalFontColorID))
 
+	case DimTextStyleID:
+		s = s.Foreground(d.Color(DimFontColorID))
+
+	case DimSecondaryTextStyleID:
+		s = s.Italic(true).Foreground(d.Color(DimFontColorID))
+
 	case FocusedWidgetStyleID:
 		s = s.Border(lipgloss.RoundedBorder()).
 			BorderForeground(d.Color(FocusedBorderColorID))
