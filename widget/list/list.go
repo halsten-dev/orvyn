@@ -182,9 +182,11 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 				}
 
 			case key.Matches(msg, w.keybinds.enterFilter):
-				w.enterFilter()
+				if w.filterable {
+					w.enterFilter()
 
-				return nil
+					return nil
+				}
 
 			case key.Matches(msg, w.keybinds.clearFilter):
 				if w.filterState == FilterApplied {
