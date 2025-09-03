@@ -482,6 +482,20 @@ func (w *Widget[T]) GetGlobalIndex() int {
 	return w.globalIndex
 }
 
+func (w *Widget[T]) RemoveItem(index int) {
+	if index < 0 || index >= len(w.items) {
+		return
+	}
+
+	w.items = append(w.items[:index], w.items[index+1:]...)
+	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
+	w.focusManager.Remove(index)
+
+	if w.filterState == FilterApplied {
+		w.basicFilter(w.tiFilter.Value())
+	}
+}
+
 // SetItems takes a []T (slice of data) and instantiate all items
 // based on it.
 func (w *Widget[T]) SetItems(items []T) {
