@@ -91,12 +91,12 @@ func Render() string {
 
 // Helper
 
-func GetKeyMsg(msg tea.Msg) (bool, tea.KeyMsg) {
+func GetKeyMsg(msg tea.Msg) (tea.KeyMsg, bool) {
 	if m, ok := msg.(tea.KeyMsg); ok {
-		return true, m
+		return m, true
 	}
 
-	return false, tea.KeyMsg{}
+	return tea.KeyMsg{}, false
 }
 
 // Theme

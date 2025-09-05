@@ -39,7 +39,7 @@ func New(label string) *Widget {
 }
 
 func (w *Widget) Update(msg tea.Msg) tea.Cmd {
-	if ok, m := orvyn.GetKeyMsg(msg); ok {
+	if m, ok := orvyn.GetKeyMsg(msg); ok {
 		switch {
 		case key.Matches(m, w.CheckKeybind):
 			w.checked = !w.checked
