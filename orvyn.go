@@ -89,6 +89,16 @@ func Render() string {
 	return layout.Render()
 }
 
+// Helper
+
+func GetKeyMsg(msg tea.Msg) (bool, tea.KeyMsg) {
+	if m, ok := msg.(tea.KeyMsg); ok {
+		return true, m
+	}
+
+	return false, tea.KeyMsg{}
+}
+
 // Theme
 
 func GetTheme() theme.Theme {

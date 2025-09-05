@@ -1,0 +1,112 @@
+package checkbox
+
+import (
+	"github.com/charmbracelet/bubbles/key"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn"
+	"github.com/halsten-dev/orvyn/theme"
+)
+
+type Widget struct {
+	orvyn.BaseWidget
+	orvyn.BaseFocusable
+
+	label string
+
+	checked bool
+
+	contentSize orvyn.Size
+
+	style lipgloss.Style
+
+	CheckKeybind key.Binding
+}
+
+func New(label string) *Widget {
+	w := new(Widget)
+
+	w.BaseWidget = orvyn.NewBaseWidget()
+
+	w.checked = false
+	w.label = label
+
+	w.CheckKeybind = key.NewBinding(key.WithKeys(" "))
+
+	w.OnBlur()
+
+	return w
+}
+
+func (w *Widget) Update(msg tea.Msg) tea.Cmd {
+	if ok, m := orvyn.GetKeyMsg(msg); ok {
+		switch {
+		case key.Matches(m, w.CheckKeybind):
+			w.checked = !w.checked
+		}
+	}
+
+	return nil
+}
+
+func (w *Widget) Resize(size orvyn.Size) {
+	size.Height = 3
+
+	w.BaseWidget.Resize(size)
+
+	size.Width -= w.style.GetHorizontalFrameSize()
+	size.Height -= w.style.GetVerticalFrameSize()
+
+	w.contentSize = size
+}
+
+func (w *Widget) Render() string {
+	var checkbox string
+	var label string
+	var checked string
+
+	checked = "   "
+
+	if w.checked {
+		checked = orvyn.GetTheme().Style(theme.TitleStyleID).Render(" X ")
+	}
+
+	checkbox = w.style.Render(checked)
+
+	label = w.style.Width(w.contentSize.Width - 5).
+		BorderStyle(lipgloss.HiddenBorder()).Render(w.label)
+
+	return lipgloss.JoinHorizontal(lipgloss.Center, checkbox, label)
+}
+
+func (w *Widget) OnFocus() {
+	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
+}
+
+func (w *Widget) OnBlur() {
+	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
+}
+
+func (w *Widget) OnEnterInput() {}
+
+func (w *Widget) OnExitInput() {}
+
+func (w *Widget) GetMinSize() orvyn.Size {
+	return orvyn.NewSize(15, 3)
+}
+
+func (w *Widget) GetPreferredSize() orvyn.Size {
+	return orvyn.NewSize(46, 3)
+}
+
+func (w *Widget) IsChecked() bool {
+	return w.checked
+}
+
+func (w *Widget) SetChecked(checked bool) {
+	w.checked = checked
+}
+
+func (w *Widget) SetLabel(label string) {
+	w.label = label
+}
