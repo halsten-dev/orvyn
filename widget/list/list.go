@@ -139,6 +139,14 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	return w
 }
 
+func (w *Widget[T]) Init() tea.Cmd {
+	w.clearFilter()
+
+	w.focusManager.FocusFirst()
+
+	return nil
+}
+
 func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 	if w.filterState == Filtering {
 		switch msg := msg.(type) {
