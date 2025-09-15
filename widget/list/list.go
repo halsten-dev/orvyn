@@ -135,6 +135,8 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.MinSize = orvyn.NewSize(10, 5)
 	w.PreferredSize = orvyn.NewSize(20, 10)
 
+	w.maxItemHeight = 1
+
 	w.OnBlur()
 
 	return w
