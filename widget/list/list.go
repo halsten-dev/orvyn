@@ -559,6 +559,7 @@ func (w *Widget[T]) GetSelectedItem() T {
 
 func (w *Widget[T]) SetItem(index int, data T) {
 	w.items[index] = data
+	w.listItems[index] = w.itemConstructor(&w.items[index])
 }
 
 func (w *Widget[T]) AppendItem(data T) {
