@@ -226,12 +226,6 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 	w.tiFilter.Resize(size)
 
-	for _, li := range w.listItems {
-		li.Resize(size)
-
-		w.maxItemHeight = max(w.maxItemHeight, li.GetSize().Height)
-	}
-
 	w.contentSize = size
 
 	w.paginatorUpdate()
@@ -239,6 +233,12 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 
 func (w *Widget[T]) paginatorUpdate() {
 	var perPage int
+
+	for _, li := range w.listItems {
+		li.Resize(w.contentSize)
+
+		w.maxItemHeight = max(w.maxItemHeight, li.GetSize().Height)
+	}
 
 	calcHeight := w.contentSize.Height - 1 // paginator
 
