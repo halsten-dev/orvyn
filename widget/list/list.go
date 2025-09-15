@@ -539,6 +539,8 @@ func (w *Widget[T]) SetItems(items []T) {
 
 	w.focusManager.SetWidgets(focusableList)
 
+	w.focusManager.Focus(w.globalIndex)
+
 	w.paginatorUpdate()
 }
 
@@ -555,11 +557,6 @@ func (w *Widget[T]) GetItems() []T {
 
 func (w *Widget[T]) GetSelectedItem() T {
 	return w.items[w.globalIndex]
-}
-
-func (w *Widget[T]) SetItem(index int, data T) {
-	w.items[index] = data
-	w.listItems[index] = w.itemConstructor(&w.items[index])
 }
 
 func (w *Widget[T]) AppendItem(data T) {
