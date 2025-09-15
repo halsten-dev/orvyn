@@ -562,6 +562,7 @@ func (w *Widget[T]) AppendItem(data T) {
 
 	w.globalIndex = len(w.items) - 1
 	w.moveCursor(w.globalIndex)
+	w.focusManager.Focus(w.globalIndex)
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
@@ -575,6 +576,7 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 
 	w.globalIndex = index
 	w.moveCursor(w.globalIndex)
+	w.focusManager.Focus(w.globalIndex)
 }
 
 func (w *Widget[T]) FocusFirst() {
