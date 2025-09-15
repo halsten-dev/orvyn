@@ -517,6 +517,8 @@ func (w *Widget[T]) RemoveItem(index int) {
 	w.paginatorUpdate()
 
 	w.PreviousItem()
+
+	w.focusManager.Focus(w.globalIndex)
 }
 
 // SetItems takes a []T (slice of data) and instantiate all items

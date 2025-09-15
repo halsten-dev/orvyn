@@ -64,7 +64,7 @@ func (f *FocusManager) Remove(index int) {
 	}
 
 	f.widgets = append(f.widgets[:index], f.widgets[index+1:]...)
-	
+
 	f.tabIndex = f.getPreviousIndex()
 }
 
@@ -252,6 +252,10 @@ func (f *FocusManager) exitInput(index int) {
 func (f *FocusManager) getNextIndex() int {
 	var index int
 
+	if len(f.widgets) == 0 {
+		return 0
+	}
+
 	index = f.tabIndex + 1
 
 	for {
@@ -270,6 +274,10 @@ func (f *FocusManager) getNextIndex() int {
 
 func (f *FocusManager) getPreviousIndex() int {
 	var index int
+
+	if len(f.widgets) == 0 {
+		return 0
+	}
 
 	index = f.tabIndex - 1
 
