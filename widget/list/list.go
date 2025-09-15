@@ -251,6 +251,8 @@ func (w *Widget[T]) paginatorUpdate() {
 
 	w.paginator.PerPage = perPage
 
+	w.paginator.TotalPages = 0
+
 	if w.filterState == FilterApplied {
 		w.paginator.SetTotalPages(len(w.filteredListItems))
 	} else {
