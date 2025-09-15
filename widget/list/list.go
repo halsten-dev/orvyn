@@ -559,6 +559,8 @@ func (w *Widget[T]) AppendItem(data T) {
 	w.items = append(w.items, data)
 
 	w.SetItems(w.items)
+
+	w.moveCursor(len(w.items) - 1)
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
@@ -569,6 +571,8 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 	w.items[index] = data
 
 	w.SetItems(w.items)
+
+	w.moveCursor(index)
 }
 
 func (w *Widget[T]) FocusFirst() {
