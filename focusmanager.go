@@ -64,6 +64,8 @@ func (f *FocusManager) Remove(index int) {
 	}
 
 	f.widgets = append(f.widgets[:index], f.widgets[index+1:]...)
+	
+	f.tabIndex = f.getPreviousIndex()
 }
 
 // Focus set the focus on the Focusable Widget at the given index.
