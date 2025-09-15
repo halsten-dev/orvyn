@@ -576,6 +576,11 @@ func (w *Widget[T]) AppendItem(data T) {
 func (w *Widget[T]) InsertItem(index int, data T) {
 	w.clearFilter()
 
+	if len(w.items) == 0 {
+		w.AppendItem(data)
+		return
+	}
+
 	w.items = append(w.items[:index+1], w.items[index:]...)
 
 	w.items[index] = data
