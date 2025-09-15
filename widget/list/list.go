@@ -89,7 +89,8 @@ type Widget[T any] struct {
 
 	style lipgloss.Style
 
-	contentSize orvyn.Size
+	contentSize   orvyn.Size
+	maxItemHeight int
 
 	keybinds keybinds
 
@@ -214,9 +215,7 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 }
 
 func (w *Widget[T]) Resize(size orvyn.Size) {
-	var perPage int
-
-	maxItemHeight := 1
+	w.maxItemHeight = 1
 
 	w.BaseWidget.Resize(size)
 
@@ -228,16 +227,24 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	for _, li := range w.listItems {
 		li.Resize(size)
 
-		maxItemHeight = max(maxItemHeight, li.GetSize().Height)
+		w.maxItemHeight = max(w.maxItemHeight, li.GetSize().Height)
 	}
 
-	calcHeight := size.Height - 1 // paginator
+	w.contentSize = size
+
+	w.paginatorUpdate()
+}
+
+func (w *Widget[T]) paginatorUpdate() {
+	var perPage int
+
+	calcHeight := w.contentSize.Height - 1 // paginator
 
 	if w.filterable {
 		calcHeight -= w.tiFilter.GetSize().Height
 	}
 
-	perPage = calcHeight / maxItemHeight
+	perPage = calcHeight / w.maxItemHeight
 	perPage = max(perPage, 1)
 
 	w.paginator.PerPage = perPage
@@ -247,8 +254,6 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	} else {
 		w.paginator.SetTotalPages(len(w.listItems))
 	}
-
-	w.contentSize = size
 }
 
 func (w *Widget[T]) Render() string {
@@ -523,6 +528,8 @@ func (w *Widget[T]) SetItems(items []T) {
 	}
 
 	w.focusManager.SetWidgets(focusableList)
+
+	w.paginatorUpdate()
 }
 
 func (w *Widget[T]) SetCursorMovementKeybinds(cursorUp, cursorDown key.Binding) {
@@ -545,12 +552,16 @@ func (w *Widget[T]) SetItem(index int, data T) {
 }
 
 func (w *Widget[T]) AppendItem(data T) {
+	w.clearFilter()
+
 	w.items = append(w.items, data)
 
 	w.SetItems(w.items)
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
+	w.clearFilter()
+
 	w.items = append(w.items[:index+1], w.items[index:]...)
 
 	w.items[index] = data
@@ -610,9 +621,9 @@ func (w *Widget[T]) basicFilter(s string) {
 
 	w.filterState = FilterApplied
 
-	w.paginator.SetTotalPages(max(len(w.filteredListItems), 1))
-
 	w.FocusFirst()
+
+	w.paginatorUpdate()
 }
 
 func (w *Widget[T]) clearFilter() {
@@ -627,9 +638,9 @@ func (w *Widget[T]) clearFilter() {
 
 	w.filterState = Unfiltered
 
-	w.paginator.SetTotalPages(len(w.listItems))
-
 	w.FocusFirst()
+
+	w.paginatorUpdate()
 }
 
 func (w *Widget[T]) enterFilter() {
@@ -637,7 +648,7 @@ func (w *Widget[T]) enterFilter() {
 	w.tiFilter.OnFocus()
 	w.filterState = Filtering
 
-	w.paginator.SetTotalPages(len(w.listItems))
+	w.paginatorUpdate()
 }
 
 func (w *Widget[T]) getFilteredGlobalIndex() int {
