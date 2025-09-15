@@ -513,6 +513,10 @@ func (w *Widget[T]) RemoveItem(index int) {
 	if w.filterState == FilterApplied {
 		w.basicFilter(w.tiFilter.Value())
 	}
+
+	w.paginatorUpdate()
+
+	w.PreviousItem()
 }
 
 // SetItems takes a []T (slice of data) and instantiate all items
