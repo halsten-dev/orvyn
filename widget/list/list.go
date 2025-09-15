@@ -507,14 +507,12 @@ func (w *Widget[T]) RemoveItem(index int) {
 	}
 
 	w.items = append(w.items[:index], w.items[index+1:]...)
-	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
-	w.focusManager.Remove(index)
+
+	w.SetItems(w.items)
 
 	if w.filterState == FilterApplied {
 		w.basicFilter(w.tiFilter.Value())
 	}
-
-	w.paginatorUpdate()
 
 	w.PreviousItem()
 
