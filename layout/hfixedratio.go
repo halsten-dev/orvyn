@@ -1,11 +1,12 @@
 package layout
 
 import (
-	"github.com/charmbracelet/lipgloss"
-	"github.com/halsten-dev/orvyn"
 	"log"
 	"math"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn"
 )
 
 type FixedRatioRenderable struct {
@@ -61,7 +62,11 @@ func (l *HBoxFixedRatio) Render() string {
 	layoutSize := l.GetSize()
 
 	totalWidth := layoutSize.Width - l.margin
-	totalWidth -= l.gap*len(l.elements) - 1
+
+	if l.gap > 0 {
+		totalWidth -= l.gap*len(l.elements) - 1
+	}
+
 	usedWidth := 0
 
 	elementSize := orvyn.NewSize(0, layoutSize.Height)
