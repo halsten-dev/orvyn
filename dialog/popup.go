@@ -36,7 +36,7 @@ type Screen struct {
 
 // New returns a new *Screen based on the given Config.
 // This screen will need to be used with orvyn.OpenDialog().
-func New(config Config) *Screen {
+func NewPopup(config Config) *Screen {
 	var b strings.Builder
 
 	s := new(Screen)
