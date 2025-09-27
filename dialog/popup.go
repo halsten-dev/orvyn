@@ -1,4 +1,4 @@
-package popup
+package dialog
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ type Screen struct {
 	value uint
 }
 
-// New returns a new *Screen based on the given Config.
+// New returns a new screen based on the given Config.
 // This screen will need to be used with orvyn.OpenDialog().
 func NewPopup(config Config) *Screen {
 	var b strings.Builder
