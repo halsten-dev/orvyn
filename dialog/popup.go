@@ -23,7 +23,7 @@ type Config struct {
 	Options []Option
 }
 
-type Screen struct {
+type PopupDialog struct {
 	config Config
 
 	content *orvyn.SimpleRenderable
@@ -36,10 +36,10 @@ type Screen struct {
 
 // New returns a new screen based on the given Config.
 // This screen will need to be used with orvyn.OpenDialog().
-func NewPopup(config Config) *Screen {
+func NewPopup(config Config) *PopupDialog {
 	var b strings.Builder
 
-	s := new(Screen)
+	s := new(PopupDialog)
 
 	t := orvyn.GetTheme()
 	ns := t.Style(theme.NormalTextStyleID)
@@ -80,15 +80,15 @@ func NewPopup(config Config) *Screen {
 	return s
 }
 
-func (s *Screen) OnEnter(i any) tea.Cmd {
+func (s *PopupDialog) OnEnter(i any) tea.Cmd {
 	return nil
 }
 
-func (s *Screen) OnExit() any {
+func (s *PopupDialog) OnExit() any {
 	return s.value
 }
 
-func (s *Screen) Update(msg tea.Msg) tea.Cmd {
+func (s *PopupDialog) Update(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		for _, o := range s.config.Options {
@@ -102,6 +102,6 @@ func (s *Screen) Update(msg tea.Msg) tea.Cmd {
 	return nil
 }
 
-func (s *Screen) Render() orvyn.Layout {
+func (s *PopupDialog) Render() orvyn.Layout {
 	return s.layout
 }
