@@ -1,9 +1,10 @@
 package list
 
 import (
-	"github.com/halsten-dev/orvyn/widget/textinput"
 	"math"
 	"strings"
+
+	"github.com/halsten-dev/orvyn/widget/textinput"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/paginator"
@@ -647,6 +648,7 @@ func (w *Widget[T]) basicFilter(s string) {
 	w.FocusFirst()
 
 	w.paginatorUpdate()
+	w.paginator.Page = 0
 }
 
 func (w *Widget[T]) clearFilter() {

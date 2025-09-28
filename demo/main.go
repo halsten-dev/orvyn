@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/demo/screen"
 	"github.com/halsten-dev/orvyn/demo/screen/inputwidgetdemo"
 	"github.com/halsten-dev/orvyn/demo/screen/listdemo"
-	"log"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	orvyn.RegisterScreen(screen.ListDemoScreenID, listdemo.New())
 	orvyn.RegisterScreen(screen.InputWidgetDemoScreenID, inputwidgetdemo.New())
 
-	orvyn.SwitchScreen(screen.InputWidgetDemoScreenID)
+	orvyn.SwitchScreen(screen.ListDemoScreenID)
 
 	p := tea.NewProgram(&App{}, tea.WithAltScreen())
 
