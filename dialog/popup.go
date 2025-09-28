@@ -44,6 +44,7 @@ func NewPopup(config Config) *PopupDialog {
 	t := orvyn.GetTheme()
 	ns := t.Style(theme.NormalTextStyleID)
 	ds := t.Style(theme.DimTextStyleID)
+	nds := t.Style(theme.NeutralDimTextStyleID)
 
 	s.config = config
 
@@ -58,7 +59,7 @@ func NewPopup(config Config) *PopupDialog {
 
 	for i, o := range config.Options {
 		if i > 0 {
-			b.WriteString(fmt.Sprintf(" %c ", '•'))
+			b.WriteString(nds.Render(fmt.Sprintf(" %c ", '•')))
 		}
 
 		b.WriteString(fmt.Sprintf("%s %s",
