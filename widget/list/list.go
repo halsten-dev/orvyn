@@ -600,8 +600,12 @@ func (w *Widget[T]) FocusFirst() {
 		if len(w.filteredListItems) > 0 {
 			w.globalIndex = w.filteredListItems[0].index
 			w.cursor = 0
-			w.paginator.Page = 0
+		} else {
+			w.cursor = -1
+			w.globalIndex = -1
 		}
+
+		w.paginator.Page = 0
 	} else {
 		w.globalIndex = 0
 		w.moveCursor(w.globalIndex)
@@ -645,10 +649,9 @@ func (w *Widget[T]) basicFilter(s string) {
 
 	w.filterState = FilterApplied
 
-	w.FocusFirst()
-
 	w.paginatorUpdate()
-	w.paginator.Page = 0
+
+	w.FocusFirst()
 }
 
 func (w *Widget[T]) clearFilter() {
