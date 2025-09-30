@@ -182,16 +182,8 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 			case key.Matches(msg, w.focusManager.PreviousFocusKeybind):
 				w.PreviousItem()
 
-				if w.CursorMovedCallback != nil {
-					w.CursorMovedCallback(w.globalIndex)
-				}
-
 			case key.Matches(msg, w.focusManager.NextFocusKeybind):
 				w.NextItem()
-
-				if w.CursorMovedCallback != nil {
-					w.CursorMovedCallback(w.globalIndex)
-				}
 
 			case key.Matches(msg, w.keybinds.enterFilter):
 				if w.filterable {
@@ -479,6 +471,9 @@ func (w *Widget[T]) nextFilteredItem() {
 
 func (w *Widget[T]) moveCursor(index int) {
 	// based on the global index set the cursor and the current page.
+	if index < 0 {
+		return
+	}
 
 	itemsOnPage := w.paginator.PerPage
 
@@ -487,6 +482,10 @@ func (w *Widget[T]) moveCursor(index int) {
 
 	w.paginator.Page = page
 	w.cursor = cursor
+
+	if w.CursorMovedCallback != nil {
+		w.CursorMovedCallback(w.globalIndex)
+	}
 }
 
 func (w *Widget[T]) SetFilterable(filterable bool) {
@@ -608,13 +607,9 @@ func (w *Widget[T]) FocusFirst() {
 		w.paginator.Page = 0
 	} else {
 		w.globalIndex = 0
-		w.moveCursor(w.globalIndex)
 	}
 
-	if w.CursorMovedCallback != nil {
-		w.CursorMovedCallback(w.globalIndex)
-	}
-
+	w.moveCursor(w.globalIndex)
 }
 
 func (w *Widget[T]) BlurCurrent() {
