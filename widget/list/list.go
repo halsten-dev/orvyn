@@ -95,7 +95,8 @@ type Widget[T any] struct {
 
 	keybinds keybinds
 
-	CursorMovedCallback func(int)
+	CursorMovingCallback func(int)
+	CursorMovedCallback  func(int)
 }
 
 // New creates a new *Widget list and takes an itemConstructor as parameter.
@@ -355,6 +356,10 @@ func (w *Widget[T]) PreviousItem() {
 		return
 	}
 
+	if w.CursorMovingCallback != nil {
+		w.CursorMovingCallback(w.globalIndex)
+	}
+
 	if w.filterState == FilterApplied {
 		w.previousFilteredItem()
 		return
@@ -412,6 +417,10 @@ func (w *Widget[T]) previousFilteredItem() {
 func (w *Widget[T]) NextItem() {
 	if len(w.listItems) == 0 {
 		return
+	}
+
+	if w.CursorMovingCallback != nil {
+		w.CursorMovingCallback(w.globalIndex)
 	}
 
 	if w.filterState == FilterApplied {
