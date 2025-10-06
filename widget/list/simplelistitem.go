@@ -14,7 +14,7 @@ type SimpleListItem struct {
 	value *string
 }
 
-func SimpleListItemConstructor(value *string) IListItem {
+func SimpleListItemConstructor(value *string) ListItem {
 	sli := new(SimpleListItem)
 
 	sli.BaseWidget = orvyn.NewBaseWidget()
@@ -32,6 +32,8 @@ func (s *SimpleListItem) Resize(size orvyn.Size) {
 
 	s.BaseWidget.Resize(size)
 }
+
+func (s *SimpleListItem) UpdateData() {}
 
 func (s *SimpleListItem) Render() string {
 	size := s.GetSize()
