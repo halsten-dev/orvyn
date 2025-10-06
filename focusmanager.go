@@ -51,10 +51,22 @@ func (f *FocusManager) Add(widget Focusable) {
 	f.widgets = append(f.widgets, widget)
 }
 
-// SetWidgets replaces the manager widget list with the one given.
-// Widget order defines the focus order.
-func (f *FocusManager) SetWidgets(widgets []Focusable) {
-	f.widgets = widgets
+// Insert add a Focusable Widget at the given index.
+func (f *FocusManager) Insert(index int, widget Focusable) {
+	if index < 0 || index >= len(f.widgets) {
+		return
+	}
+
+	f.widgets = append(f.widgets[:index+1], f.widgets[index:]...)
+}
+
+// Update allows to change the widget at the given index.
+func (f *FocusManager) UpdateWidget(index int, widget Focusable) {
+	if index < 0 || index >= len(f.widgets) {
+		return
+	}
+
+	f.widgets[index] = widget
 }
 
 // Remove the widget from the manager at the given index.
@@ -66,6 +78,12 @@ func (f *FocusManager) Remove(index int) {
 	f.widgets = append(f.widgets[:index], f.widgets[index+1:]...)
 
 	f.tabIndex = f.getPreviousIndex()
+}
+
+// SetWidgets replaces the manager widget list with the one given.
+// Widget order defines the focus order.
+func (f *FocusManager) SetWidgets(widgets []Focusable) {
+	f.widgets = widgets
 }
 
 // Focus set the focus on the Focusable Widget at the given index.

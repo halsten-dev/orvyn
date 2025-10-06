@@ -15,19 +15,20 @@ import (
 	"github.com/halsten-dev/orvyn/widget"
 )
 
-type IListItem interface {
+type ListItem interface {
 	orvyn.Focusable
 	orvyn.Renderable
 	FilterValue() string
+	UpdateData()
 }
 
 // ItemConstructor defines the signature of the item constructor.
 // T type represents the type of the item data.
-type ItemConstructor[T any] func(*T) IListItem
+type ItemConstructor[T any] func(*T) ListItem
 
 type filteredItem struct {
 	index int // corresponding global index
-	item  *IListItem
+	item  *ListItem
 }
 
 type filteredItems []filteredItem
@@ -66,9 +67,10 @@ type Widget[T any] struct {
 	orvyn.BaseWidget
 	orvyn.BaseFocusable
 
-	InfiniteScroll bool
-	filterable     bool
-	filterState    FilterState
+	InfiniteScroll   bool
+	AutoFocusNewItem bool
+	filterable       bool
+	filterState      FilterState
 
 	cursor      int
 	globalIndex int
@@ -76,7 +78,7 @@ type Widget[T any] struct {
 	MinSize       orvyn.Size
 	PreferredSize orvyn.Size
 
-	listItems         []IListItem
+	listItems         []ListItem
 	filteredListItems filteredItems
 	items             []T
 
@@ -117,6 +119,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.itemConstructor = itemConstructor
 
 	w.InfiniteScroll = false
+	w.AutoFocusNewItem = false
 	w.filterable = true
 	w.filterState = Unfiltered
 
@@ -356,9 +359,7 @@ func (w *Widget[T]) PreviousItem() {
 		return
 	}
 
-	if w.CursorMovingCallback != nil {
-		w.CursorMovingCallback(w.globalIndex)
-	}
+	w.callCursorMovingCallback(w.globalIndex)
 
 	if w.filterState == FilterApplied {
 		w.previousFilteredItem()
@@ -419,9 +420,7 @@ func (w *Widget[T]) NextItem() {
 		return
 	}
 
-	if w.CursorMovingCallback != nil {
-		w.CursorMovingCallback(w.globalIndex)
-	}
+	w.callCursorMovingCallback(w.globalIndex)
 
 	if w.filterState == FilterApplied {
 		w.nextFilteredItem()
@@ -510,30 +509,12 @@ func (w *Widget[T]) GetGlobalIndex() int {
 	return w.globalIndex
 }
 
-func (w *Widget[T]) RemoveItem(index int) {
-	if index < 0 || index >= len(w.items) {
-		return
-	}
-
-	w.items = append(w.items[:index], w.items[index+1:]...)
-
-	w.SetItems(w.items)
-
-	if w.filterState == FilterApplied {
-		w.basicFilter(w.tiFilter.Value())
-	}
-
-	w.PreviousItem()
-
-	w.focusManager.Focus(w.globalIndex)
-}
-
 // SetItems takes a []T (slice of data) and instantiate all items
 // based on it.
 func (w *Widget[T]) SetItems(items []T) {
 	w.items = items
 
-	w.listItems = make([]IListItem, 0)
+	w.listItems = make([]ListItem, 0)
 	focusableList := make([]orvyn.Focusable, 0)
 
 	for i := range w.items {
@@ -563,11 +544,36 @@ func (w *Widget[T]) GetItems() []T {
 }
 
 func (w *Widget[T]) GetSelectedItem() T {
+	var none T
+
+	if w.globalIndex < 0 || w.globalIndex >= len(w.items) {
+		return none
+	}
+
 	return w.items[w.globalIndex]
 }
 
+func (w *Widget[T]) GetItem(index int) T {
+	var none T
+
+	if index < 0 || index >= len(w.items) {
+		return none
+	}
+
+	return w.items[index]
+}
+
 func (w *Widget[T]) SetItem(index int, data T) {
+	if index < 0 || index >= len(w.items) {
+		return
+	}
+
 	w.items[index] = data
+	w.listItems[index].UpdateData()
+
+	if w.filterState == FilterApplied {
+		w.basicFilter(w.tiFilter.Value())
+	}
 }
 
 func (w *Widget[T]) AppendItem(data T) {
@@ -575,11 +581,25 @@ func (w *Widget[T]) AppendItem(data T) {
 
 	w.items = append(w.items, data)
 
-	w.SetItems(w.items)
+	index := len(w.items) - 1
 
-	w.globalIndex = len(w.items) - 1
-	w.moveCursor(w.globalIndex)
-	w.focusManager.Focus(w.globalIndex)
+	widget := w.itemConstructor(&w.items[index])
+
+	w.listItems = append(w.listItems, widget)
+	w.focusManager.Add(widget)
+
+	if w.filterState == FilterApplied {
+		w.basicFilter(w.tiFilter.Value())
+	}
+
+	w.paginatorUpdate()
+
+	if w.AutoFocusNewItem {
+		w.callCursorMovingCallback(w.globalIndex)
+		w.globalIndex = index
+		w.moveCursor(w.globalIndex)
+		w.focusManager.Focus(w.globalIndex)
+	}
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
@@ -594,10 +614,43 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 
 	w.items[index] = data
 
-	w.SetItems(w.items)
+	widget := w.itemConstructor(&w.items[index])
 
-	w.globalIndex = index
-	w.moveCursor(w.globalIndex)
+	w.listItems = append(w.listItems[:index+1], w.listItems[index:]...)
+	w.listItems[index] = widget
+	w.focusManager.Insert(index, widget)
+
+	if w.filterState == FilterApplied {
+		w.basicFilter(w.tiFilter.Value())
+	}
+
+	w.paginatorUpdate()
+
+	if w.AutoFocusNewItem {
+		w.callCursorMovingCallback(w.globalIndex)
+		w.globalIndex = index
+		w.moveCursor(w.globalIndex)
+		w.focusManager.Focus(w.globalIndex)
+	}
+}
+
+func (w *Widget[T]) RemoveItem(index int) {
+	if index < 0 || index >= len(w.items) {
+		return
+	}
+
+	w.items = append(w.items[:index], w.items[index+1:]...)
+	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
+	w.focusManager.Remove(index)
+
+	if w.filterState == FilterApplied {
+		w.basicFilter(w.tiFilter.Value())
+	}
+
+	w.paginatorUpdate()
+
+	w.PreviousItem()
+
 	w.focusManager.Focus(w.globalIndex)
 }
 
@@ -686,4 +739,14 @@ func (w *Widget[T]) enterFilter() {
 func (w *Widget[T]) getFilteredGlobalIndex() int {
 	index := (w.paginator.Page * w.paginator.PerPage) + w.cursor
 	return w.filteredListItems[index].index
+}
+
+func (w *Widget[T]) callCursorMovingCallback(index int) {
+	if index < 0 || index >= len(w.items) {
+		return
+	}
+
+	if w.CursorMovingCallback != nil {
+		w.CursorMovingCallback(index)
+	}
 }
