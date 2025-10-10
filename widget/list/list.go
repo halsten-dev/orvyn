@@ -15,23 +15,24 @@ import (
 	"github.com/halsten-dev/orvyn/widget"
 )
 
-type ListItem interface {
+type ListItem[T any] interface {
 	orvyn.Focusable
 	orvyn.Renderable
 	FilterValue() string
-	UpdateData()
+	UpdateData(data T)
+	GetData() T
 }
 
 // ItemConstructor defines the signature of the item constructor.
 // T type represents the type of the item data.
-type ItemConstructor[T any] func(*T) ListItem
+type ItemConstructor[T any] func(T) ListItem[T]
 
-type filteredItem struct {
+type filteredItem[T any] struct {
 	index int // corresponding global index
-	item  *ListItem
+	item  *ListItem[T]
 }
 
-type filteredItems []filteredItem
+type filteredItems[T any] []filteredItem[T]
 
 // FilterState Taken from github.com/charmbracelet/bubbles/list/list.go
 // FilterState describes the current filtering state on the model.
@@ -78,9 +79,8 @@ type Widget[T any] struct {
 	MinSize       orvyn.Size
 	PreferredSize orvyn.Size
 
-	listItems         []ListItem
-	filteredListItems filteredItems
-	items             []T
+	listItems         []ListItem[T]
+	filteredListItems filteredItems[T]
 
 	tiFilter *textinput.Widget
 
@@ -370,7 +370,7 @@ func (w *Widget[T]) PreviousItem() {
 
 	if w.globalIndex < 0 {
 		if w.InfiniteScroll {
-			w.globalIndex = len(w.items) - 1
+			w.globalIndex = len(w.listItems) - 1
 			w.moveCursor(w.globalIndex)
 			return
 		}
@@ -429,14 +429,14 @@ func (w *Widget[T]) NextItem() {
 
 	w.globalIndex++
 
-	if w.globalIndex > len(w.items)-1 {
+	if w.globalIndex > len(w.listItems)-1 {
 		if w.InfiniteScroll {
 			w.globalIndex = 0
 			w.moveCursor(0)
 			return
 		}
 
-		w.globalIndex = len(w.items) - 1
+		w.globalIndex = len(w.listItems) - 1
 		w.moveCursor(w.globalIndex)
 		return
 	}
@@ -512,13 +512,11 @@ func (w *Widget[T]) GetGlobalIndex() int {
 // SetItems takes a []T (slice of data) and instantiate all items
 // based on it.
 func (w *Widget[T]) SetItems(items []T) {
-	w.items = items
-
-	w.listItems = make([]ListItem, 0)
+	w.listItems = make([]ListItem[T], 0)
 	focusableList := make([]orvyn.Focusable, 0)
 
-	for i := range w.items {
-		item := w.itemConstructor(&w.items[i])
+	for i := range items {
+		item := w.itemConstructor(items[i])
 		w.listItems = append(w.listItems,
 			item)
 		focusableList = append(focusableList,
@@ -540,36 +538,41 @@ func (w *Widget[T]) SetCursorMovementKeybinds(cursorUp, cursorDown key.Binding) 
 }
 
 func (w *Widget[T]) GetItems() []T {
-	return w.items
+	var data []T
+
+	for _, li := range w.listItems {
+		data = append(data, li.GetData())
+	}
+
+	return data
 }
 
 func (w *Widget[T]) GetSelectedItem() T {
 	var none T
 
-	if w.globalIndex < 0 || w.globalIndex >= len(w.items) {
+	if w.globalIndex < 0 || w.globalIndex >= len(w.listItems) {
 		return none
 	}
 
-	return w.items[w.globalIndex]
+	return w.listItems[w.globalIndex].GetData()
 }
 
 func (w *Widget[T]) GetItem(index int) T {
 	var none T
 
-	if index < 0 || index >= len(w.items) {
+	if index < 0 || index >= len(w.listItems) {
 		return none
 	}
 
-	return w.items[index]
+	return w.listItems[index].GetData()
 }
 
 func (w *Widget[T]) SetItem(index int, data T) {
-	if index < 0 || index >= len(w.items) {
+	if index < 0 || index >= len(w.listItems) {
 		return
 	}
 
-	w.items[index] = data
-	w.listItems[index].UpdateData()
+	w.listItems[index].UpdateData(data)
 
 	if w.filterState == FilterApplied {
 		w.basicFilter(w.tiFilter.Value())
@@ -579,11 +582,9 @@ func (w *Widget[T]) SetItem(index int, data T) {
 func (w *Widget[T]) AppendItem(data T) {
 	w.clearFilter()
 
-	w.items = append(w.items, data)
+	index := len(w.listItems) - 1
 
-	index := len(w.items) - 1
-
-	widget := w.itemConstructor(&w.items[index])
+	widget := w.itemConstructor(data)
 
 	w.listItems = append(w.listItems, widget)
 	w.focusManager.Add(widget)
@@ -605,16 +606,12 @@ func (w *Widget[T]) AppendItem(data T) {
 func (w *Widget[T]) InsertItem(index int, data T) {
 	w.clearFilter()
 
-	if len(w.items) == 0 {
+	if len(w.listItems) == 0 {
 		w.AppendItem(data)
 		return
 	}
 
-	w.items = append(w.items[:index+1], w.items[index:]...)
-
-	w.items[index] = data
-
-	widget := w.itemConstructor(&w.items[index])
+	widget := w.itemConstructor(data)
 
 	w.listItems = append(w.listItems[:index+1], w.listItems[index:]...)
 	w.listItems[index] = widget
@@ -635,11 +632,10 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 }
 
 func (w *Widget[T]) RemoveItem(index int) {
-	if index < 0 || index >= len(w.items) {
+	if index < 0 || index >= len(w.listItems) {
 		return
 	}
 
-	w.items = append(w.items[:index], w.items[index+1:]...)
 	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
 	w.focusManager.Remove(index)
 
@@ -689,11 +685,11 @@ func (w *Widget[T]) basicFilter(s string) {
 
 	w.tiFilter.OnBlur()
 
-	w.filteredListItems = make(filteredItems, 0)
+	w.filteredListItems = make(filteredItems[T], 0)
 
 	for i, v := range w.listItems {
 		if strings.Contains(v.FilterValue(), s) {
-			w.filteredListItems = append(w.filteredListItems, filteredItem{
+			w.filteredListItems = append(w.filteredListItems, filteredItem[T]{
 				index: i,
 				item:  &w.listItems[i],
 			})
@@ -715,7 +711,7 @@ func (w *Widget[T]) clearFilter() {
 	w.tiFilter.SetValue("")
 	w.tiFilter.OnBlur()
 
-	w.filteredListItems = make(filteredItems, 0)
+	w.filteredListItems = make(filteredItems[T], 0)
 
 	for _, v := range w.listItems {
 		v.SetActive(true)
@@ -742,7 +738,7 @@ func (w *Widget[T]) getFilteredGlobalIndex() int {
 }
 
 func (w *Widget[T]) callCursorMovingCallback(index int) {
-	if index < 0 || index >= len(w.items) {
+	if index < 0 || index >= len(w.listItems) {
 		return
 	}
 
