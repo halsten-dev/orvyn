@@ -150,6 +150,10 @@ func SetPreviousScreen(id ScreenID) {
 	previousScreenID = id
 }
 
+func GetPreviousScreen() ScreenID {
+	return previousScreenID
+}
+
 // GetScreen returns the Screen for the given registered ScreenID.
 func GetScreen(id ScreenID) Screen {
 	_, ok := screens[id]
