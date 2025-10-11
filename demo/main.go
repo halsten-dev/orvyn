@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/demo/screen"
 	"github.com/halsten-dev/orvyn/demo/screen/inputwidgetdemo"
@@ -18,11 +17,13 @@ func main() {
 	orvyn.RegisterScreen(screen.ListDemoScreenID, listdemo.New())
 	orvyn.RegisterScreen(screen.InputWidgetDemoScreenID, inputwidgetdemo.New())
 
-	orvyn.SwitchScreen(screen.ListDemoScreenID)
+	size1, size2 := orvyn.DivideSizeFull(93)
 
-	p := tea.NewProgram(&App{}, tea.WithAltScreen())
+	fmt.Printf("Size 1 = %d, size 2 = %d", size1, size2)
 
-	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
-	}
+	// p := tea.NewProgram(&App{}, tea.WithAltScreen())
+	//
+	// if _, err := p.Run(); err != nil {
+	// 	log.Fatal(err)
+	// }
 }

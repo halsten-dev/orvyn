@@ -18,3 +18,19 @@ func SameSize(s1, s2 Size) bool {
 
 	return false
 }
+
+func DivideSizeFull(size int) (int, int) {
+	var result int
+
+	result = size / 2
+
+	totalSize := result * 2
+
+	if totalSize == size {
+		return result, result
+	}
+
+	compensation := size - totalSize
+
+	return result + compensation, result
+}

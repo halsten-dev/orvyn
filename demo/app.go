@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/halsten-dev/orvyn"
+	"github.com/halsten-dev/orvyn/demo/screen"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -10,7 +11,7 @@ import (
 type App struct{}
 
 func (a App) Init() tea.Cmd {
-	return nil
+	return orvyn.SwitchScreen(screen.ListDemoScreenID)
 }
 
 func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
