@@ -1,9 +1,10 @@
 package layout
 
 import (
-	"github.com/halsten-dev/orvyn"
 	"math"
 	"strings"
+
+	"github.com/halsten-dev/orvyn"
 )
 
 type flexibleHeightElement struct {
@@ -89,6 +90,8 @@ func (l *DefinedWidthVerticalLayout) Render() string {
 	} else if s.Width >= prefSize.Width {
 		s.Width = prefSize.Width - l.Margin
 	}
+
+	s.Height = max(s.Height, 0)
 
 	l.calculateSize(s)
 
