@@ -134,6 +134,10 @@ func (f *FocusManager) ExitCurrentInput() {
 	}
 }
 
+func (f *FocusManager) TabIndex() int {
+	return f.tabIndex
+}
+
 // IsInputting returns true if a widget is in inputting mode.
 func (f *FocusManager) IsInputting() bool {
 	return f.isInputting
