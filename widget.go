@@ -13,6 +13,9 @@ type Widget interface {
 	// SetStyle allows to set the style of the base widget. By default theme.BlurredWidgetStyleID.
 	SetStyle(lipgloss.Style)
 
+	// GetStyle returns the widget style for custom rendering.
+	GetStyle() lipgloss.Style
+
 	// GetContentSize must be used when rendering the widget to get the real available size for the widgets content.
 	// Borders of the style have been taken into account.
 	GetContentSize() Size
@@ -59,6 +62,14 @@ func (b *BaseWidget) Resize(size Size) {
 	b.contentSize = size
 }
 
+func (b *BaseWidget) GetContentSize() Size {
+	return b.contentSize
+}
+
 func (b *BaseWidget) SetStyle(style lipgloss.Style) {
 	b.style = style
+}
+
+func (b *BaseWidget) GetStyle() lipgloss.Style {
+	return b.style
 }

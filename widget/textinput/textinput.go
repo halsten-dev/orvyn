@@ -6,14 +6,11 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Widget struct {
 	orvyn.BaseWidget
 	orvyn.BaseFocusable
-
-	style lipgloss.Style
 
 	textinput.Model
 }
@@ -21,10 +18,16 @@ type Widget struct {
 func New() *Widget {
 	w := new(Widget)
 
+	t := orvyn.GetTheme()
+
 	w.BaseWidget = orvyn.NewBaseWidget()
+	w.BaseFocusable = orvyn.NewBaseFocusable(w)
 
 	w.Model = textinput.New()
 	w.Prompt = ""
+	w.TextStyle = t.Style(theme.NormalTextStyleID)
+	w.Cursor.Style = t.Style(theme.NormalTextStyleID)
+	w.Cursor.TextStyle = t.Style(theme.NormalTextStyleID)
 
 	w.OnBlur()
 
@@ -45,27 +48,29 @@ func (w *Widget) Update(msg tea.Msg) tea.Cmd {
 }
 
 func (w *Widget) OnFocus() {
+	w.BaseFocusable.OnFocus()
 	w.Model.Focus()
-	w.updateStyle(true)
 }
 
 func (w *Widget) OnBlur() {
+	w.BaseFocusable.OnBlur()
 	w.Model.Blur()
-	w.updateStyle(false)
 }
 
 func (w *Widget) Render() string {
-	return w.style.Render(w.Model.View())
+	return w.GetStyle().Render(w.Model.View())
 }
 
 func (w *Widget) Resize(size orvyn.Size) {
-	size.Height = 1 + w.style.GetVerticalFrameSize()
+	style := w.GetStyle()
+	size.Height = 1 + style.GetVerticalFrameSize()
 
 	w.BaseWidget.Resize(size)
 
+	contentSize := w.GetContentSize()
 	// Take borders into account
-	w.Model.Width = size.Width - w.style.GetHorizontalFrameSize()
-	w.Model.Width -= max(1, len(w.Model.Prompt))
+	w.Model.Width = contentSize.Width - style.GetHorizontalFrameSize()
+	w.Model.Width -= max(0, len(w.Model.Prompt))
 	w.Model.Width = max(2, w.Model.Width)
 
 	// For the Bubbles textinput to process the update
@@ -92,17 +97,3 @@ func (w *Widget) GetPreferredSize() orvyn.Size {
 func (w *Widget) OnEnterInput() {}
 
 func (w *Widget) OnExitInput() {}
-
-func (w *Widget) updateStyle(focused bool) {
-	t := orvyn.GetTheme()
-
-	if focused {
-		w.style = t.Style(theme.FocusedWidgetStyleID)
-	} else {
-		w.style = t.Style(theme.BlurredWidgetStyleID)
-	}
-
-	w.TextStyle = t.Style(theme.NormalTextStyleID)
-	w.Cursor.Style = t.Style(theme.NormalTextStyleID)
-	w.Cursor.TextStyle = t.Style(theme.NormalTextStyleID)
-}

@@ -55,11 +55,11 @@ type Focusable interface {
 	// setInputting allows to set the inputting value.
 	setInputting(bool)
 
-	// setFocusedStyle allows to set the style when the widget is focused. By default theme.FocusedWidgetStyleID.
-	setFocusedStyle(lipgloss.Style)
+	// SetFocusedStyle allows to set the style when the widget is focused. By default theme.FocusedWidgetStyleID.
+	SetFocusedStyle(lipgloss.Style)
 
-	// setBlurredStyle allows to set the style when the widget is blurred. By default theme.BlurredWidgetStyleID.
-	setBlurredStyle(lipgloss.Style)
+	// SetBlurredStyle allows to set the style when the widget is blurred. By default theme.BlurredWidgetStyleID.
+	SetBlurredStyle(lipgloss.Style)
 }
 
 // BaseFocusable can be integrated to a Widget to make it focusable.
@@ -72,10 +72,10 @@ type BaseFocusable struct {
 	blurredStyle lipgloss.Style
 }
 
-func NewBaseFocusable(widget Widget) *BaseFocusable {
+func NewBaseFocusable(widget Widget) BaseFocusable {
 	t := GetTheme()
 
-	return &BaseFocusable{
+	return BaseFocusable{
 		widget:       widget,
 		focused:      false,
 		inputting:    false,
@@ -122,4 +122,12 @@ func (b *BaseFocusable) setFocused(focused bool) {
 
 func (b *BaseFocusable) setInputting(input bool) {
 	b.inputting = input
+}
+
+func (b *BaseFocusable) SetFocusedStyle(style lipgloss.Style) {
+	b.focusedStyle = style
+}
+
+func (b *BaseFocusable) SetBlurredStyle(style lipgloss.Style) {
+	b.blurredStyle = style
 }

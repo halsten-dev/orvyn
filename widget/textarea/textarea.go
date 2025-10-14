@@ -24,6 +24,7 @@ func New() *Widget {
 
 	w.Model = textarea.New()
 	w.Model.Prompt = ""
+	w.Model.SetWidth(10)
 
 	w.OnBlur()
 
@@ -63,11 +64,10 @@ func (w *Widget) Render() string {
 func (w *Widget) Resize(size orvyn.Size) {
 	w.BaseWidget.Resize(size)
 
-	// size.Width -= w.BlurredStyle.Base.GetHorizontalFrameSize()
-	size.Height -= w.BlurredStyle.Base.GetVerticalFrameSize()
+	contentSize := w.GetContentSize()
 
-	w.Model.SetWidth(size.Width)
-	w.Model.SetHeight(size.Height)
+	w.Model.SetWidth(contentSize.Width + 1)
+	w.Model.SetHeight(contentSize.Height)
 
 	focused := w.Model.Focused()
 	if !focused {

@@ -16,10 +16,6 @@ type Widget struct {
 
 	checked bool
 
-	contentSize orvyn.Size
-
-	style lipgloss.Style
-
 	CheckKeybind key.Binding
 }
 
@@ -27,6 +23,7 @@ func New(label string) *Widget {
 	w := new(Widget)
 
 	w.BaseWidget = orvyn.NewBaseWidget()
+	w.BaseFocusable = orvyn.NewBaseFocusable(w)
 
 	w.checked = false
 	w.label = label
@@ -53,11 +50,6 @@ func (w *Widget) Resize(size orvyn.Size) {
 	size.Height = 3
 
 	w.BaseWidget.Resize(size)
-
-	size.Width -= w.style.GetHorizontalFrameSize()
-	size.Height -= w.style.GetVerticalFrameSize()
-
-	w.contentSize = size
 }
 
 func (w *Widget) Render() string {
@@ -65,26 +57,20 @@ func (w *Widget) Render() string {
 	var label string
 	var checked string
 
+	style := w.GetStyle()
+
 	checked = "   "
 
 	if w.checked {
 		checked = orvyn.GetTheme().Style(theme.TitleStyleID).Render(" X ")
 	}
 
-	checkbox = w.style.Render(checked)
+	checkbox = style.Render(checked)
 
-	label = w.style.Width(w.contentSize.Width - 5).
+	label = style.Width(w.GetContentSize().Width - 5).
 		BorderStyle(lipgloss.HiddenBorder()).Render(w.label)
 
 	return lipgloss.JoinHorizontal(lipgloss.Center, checkbox, label)
-}
-
-func (w *Widget) OnFocus() {
-	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
-}
-
-func (w *Widget) OnBlur() {
-	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
 }
 
 func (w *Widget) OnEnterInput() {}

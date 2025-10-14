@@ -11,7 +11,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
-	"github.com/halsten-dev/orvyn/theme"
 	"github.com/halsten-dev/orvyn/widget"
 )
 
@@ -90,9 +89,6 @@ type Widget[T any] struct {
 
 	itemConstructor ItemConstructor[T]
 
-	style lipgloss.Style
-
-	contentSize   orvyn.Size
 	maxItemHeight int
 
 	keybinds keybinds
@@ -107,6 +103,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w := new(Widget[T])
 
 	w.BaseWidget = orvyn.NewBaseWidget()
+	w.BaseFocusable = orvyn.NewBaseFocusable(w)
 
 	w.keybinds = keybinds{
 		cursorUp:    key.NewBinding(key.WithKeys("up")),
@@ -217,13 +214,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	w.maxItemHeight = 1
 
 	w.BaseWidget.Resize(size)
-
-	size.Width -= w.style.GetHorizontalFrameSize()
-	size.Height -= w.style.GetVerticalFrameSize()
-
 	w.tiFilter.Resize(size)
-
-	w.contentSize = size
 
 	w.paginatorUpdate()
 }
@@ -231,13 +222,15 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 func (w *Widget[T]) paginatorUpdate() {
 	var perPage int
 
+	contentSize := w.GetContentSize()
+
 	for _, li := range w.listItems {
-		li.Resize(w.contentSize)
+		li.Resize(contentSize)
 
 		w.maxItemHeight = max(w.maxItemHeight, li.GetSize().Height)
 	}
 
-	calcHeight := w.contentSize.Height - 1 // paginator
+	calcHeight := contentSize.Height - 1 // paginator
 
 	if w.filterable {
 		calcHeight -= w.tiFilter.GetSize().Height
@@ -301,9 +294,11 @@ func (w *Widget[T]) Render() string {
 	view = lipgloss.JoinVertical(lipgloss.Center,
 		elements...)
 
-	return w.style.
-		Width(w.contentSize.Width).
-		Height(w.contentSize.Height).
+	contentSize := w.GetContentSize()
+
+	return w.GetStyle().
+		Width(contentSize.Width).
+		Height(contentSize.Height).
 		Render(view)
 }
 
@@ -316,14 +311,12 @@ func (w *Widget[T]) GetPreferredSize() orvyn.Size {
 }
 
 func (w *Widget[T]) OnFocus() {
-	w.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
-
+	w.BaseFocusable.OnFocus()
 	widget.UpdatePaginatorTheme(&w.paginator)
 }
 
 func (w *Widget[T]) OnBlur() {
-	w.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
-
+	w.BaseFocusable.OnBlur()
 	widget.UpdatePaginatorTheme(&w.paginator)
 }
 

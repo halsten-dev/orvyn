@@ -1,15 +1,12 @@
 package list
 
 import (
-	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
-	"github.com/halsten-dev/orvyn/theme"
 )
 
 type SimpleListItem struct {
 	orvyn.BaseWidget
 	orvyn.BaseFocusable
-	style lipgloss.Style
 
 	value string
 }
@@ -18,19 +15,13 @@ func SimpleListItemConstructor(value string) ListItem[string] {
 	sli := new(SimpleListItem)
 
 	sli.BaseWidget = orvyn.NewBaseWidget()
+	sli.BaseFocusable = orvyn.NewBaseFocusable(sli)
 
 	sli.value = value
 
 	sli.OnBlur()
 
 	return sli
-}
-
-func (s *SimpleListItem) Resize(size orvyn.Size) {
-	size.Width -= s.style.GetHorizontalFrameSize()
-	size.Height = lipgloss.Height(s.style.Render(s.value))
-
-	s.BaseWidget.Resize(size)
 }
 
 func (s *SimpleListItem) UpdateData(value string) {
@@ -41,20 +32,17 @@ func (s *SimpleListItem) GetData() string {
 	return s.value
 }
 
-func (s *SimpleListItem) Render() string {
-	size := s.GetSize()
+func (s *SimpleListItem) Resize(size orvyn.Size) {
+	size.Height = 3
+	s.BaseWidget.Resize(size)
+}
 
-	return s.style.
+func (s *SimpleListItem) Render() string {
+	size := s.GetContentSize()
+
+	return s.GetStyle().
 		Width(size.Width).
 		Render(s.value)
-}
-
-func (s *SimpleListItem) OnFocus() {
-	s.style = orvyn.GetTheme().Style(theme.FocusedWidgetStyleID)
-}
-
-func (s *SimpleListItem) OnBlur() {
-	s.style = orvyn.GetTheme().Style(theme.BlurredWidgetStyleID)
 }
 
 func (s *SimpleListItem) OnEnterInput() {}

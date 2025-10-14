@@ -40,7 +40,7 @@ func (w *Widget) Init() tea.Cmd {
 }
 
 func (w *Widget) Render() string {
-	size := w.GetSize()
+	size := w.GetContentSize()
 
 	s := ""
 
