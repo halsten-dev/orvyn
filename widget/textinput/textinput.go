@@ -67,10 +67,10 @@ func (w *Widget) Resize(size orvyn.Size) {
 
 	w.BaseWidget.Resize(size)
 
-	contentSize := w.GetContentSize()
+	contentSize := w.GetSize()
 	// Take borders into account
 	w.Model.Width = contentSize.Width - style.GetHorizontalFrameSize()
-	w.Model.Width -= max(0, len(w.Model.Prompt))
+	w.Model.Width -= max(1, len(w.Model.Prompt))
 	w.Model.Width = max(2, w.Model.Width)
 
 	// For the Bubbles textinput to process the update

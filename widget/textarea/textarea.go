@@ -66,7 +66,7 @@ func (w *Widget) Resize(size orvyn.Size) {
 
 	contentSize := w.GetContentSize()
 
-	w.Model.SetWidth(contentSize.Width + 1)
+	w.Model.SetWidth(size.Width)
 	w.Model.SetHeight(contentSize.Height)
 
 	focused := w.Model.Focused()

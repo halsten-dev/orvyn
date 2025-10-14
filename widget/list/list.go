@@ -214,7 +214,7 @@ func (w *Widget[T]) Resize(size orvyn.Size) {
 	w.maxItemHeight = 1
 
 	w.BaseWidget.Resize(size)
-	w.tiFilter.Resize(size)
+	w.tiFilter.Resize(w.GetContentSize())
 
 	w.paginatorUpdate()
 }
