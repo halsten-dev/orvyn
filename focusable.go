@@ -100,6 +100,10 @@ func (b *BaseFocusable) IsInputting() bool {
 	return b.inputting
 }
 
+func (b *BaseFocusable) OnEnterInput() {}
+
+func (b *BaseFocusable) OnExitInput() {}
+
 func (b *BaseFocusable) GetFocusKeybind() *key.Binding {
 	return nil
 }
