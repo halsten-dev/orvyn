@@ -2,6 +2,8 @@ package orvyn
 
 import (
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn/theme"
 )
 
 type Focusable interface {
@@ -52,12 +54,42 @@ type Focusable interface {
 
 	// setInputting allows to set the inputting value.
 	setInputting(bool)
+
+	// setFocusedStyle allows to set the style when the widget is focused. By default theme.FocusedWidgetStyleID.
+	setFocusedStyle(lipgloss.Style)
+
+	// setBlurredStyle allows to set the style when the widget is blurred. By default theme.BlurredWidgetStyleID.
+	setBlurredStyle(lipgloss.Style)
 }
 
 // BaseFocusable can be integrated to a Widget to make it focusable.
 type BaseFocusable struct {
+	widget    Widget
 	focused   bool
 	inputting bool
+
+	focusedStyle lipgloss.Style
+	blurredStyle lipgloss.Style
+}
+
+func NewBaseFocusable(widget Widget) *BaseFocusable {
+	t := GetTheme()
+
+	return &BaseFocusable{
+		widget:       widget,
+		focused:      false,
+		inputting:    false,
+		focusedStyle: t.Style(theme.FocusedWidgetStyleID),
+		blurredStyle: t.Style(theme.BlurredWidgetStyleID),
+	}
+}
+
+func (b *BaseFocusable) OnFocus() {
+	b.widget.SetStyle(b.focusedStyle)
+}
+
+func (b *BaseFocusable) OnBlur() {
+	b.widget.SetStyle(b.blurredStyle)
 }
 
 func (b *BaseFocusable) IsFocused() bool {
