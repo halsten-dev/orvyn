@@ -106,8 +106,8 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.BaseFocusable = orvyn.NewBaseFocusable(w)
 
 	w.keybinds = keybinds{
-		cursorUp:    key.NewBinding(key.WithKeys("up")),
-		cursorDown:  key.NewBinding(key.WithKeys("down")),
+		cursorUp:    key.NewBinding(key.WithKeys("up", "k")),
+		cursorDown:  key.NewBinding(key.WithKeys("down", "j")),
 		enterFilter: key.NewBinding(key.WithKeys("/")),
 		applyFilter: key.NewBinding(key.WithKeys("enter")),
 		clearFilter: key.NewBinding(key.WithKeys("esc")),
