@@ -43,11 +43,3 @@ func (s *SimpleRenderable) Render() string {
 	return s.Style.Width(size.Width).
 		Height(size.Height).Render(s.value)
 }
-
-func (s *SimpleRenderable) GetMinSize() Size {
-	return GetRenderSize(s.Style, s.value)
-}
-
-func (s *SimpleRenderable) GetPreferredSize() Size {
-	return GetRenderSize(s.Style, s.value)
-}
