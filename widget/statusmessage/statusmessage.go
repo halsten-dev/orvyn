@@ -54,7 +54,11 @@ func (w *Widget) Render() string {
 }
 
 func (w *Widget) GetMinSize() orvyn.Size {
-	return orvyn.GetRenderSize(w.messageStyle, w.message)
+	if orvyn.SameSize(w.BaseWidget.BaseRenderable.GetMinSize(), orvyn.NewSize(1, 1)) {
+		return orvyn.GetRenderSize(w.messageStyle, w.message)
+	}
+
+	return w.BaseWidget.BaseRenderable.GetMinSize()
 }
 
 func (w *Widget) GetPreferredSize() orvyn.Size {
