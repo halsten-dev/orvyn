@@ -75,9 +75,6 @@ type Widget[T any] struct {
 	cursor      int
 	globalIndex int
 
-	MinSize       orvyn.Size
-	PreferredSize orvyn.Size
-
 	listItems         []ListItem[T]
 	filteredListItems filteredItems[T]
 
@@ -134,8 +131,8 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.focusManager.NextFocusKeybind = w.keybinds.cursorDown
 	w.focusManager.Focus(0)
 
-	w.MinSize = orvyn.NewSize(10, 5)
-	w.PreferredSize = orvyn.NewSize(20, 10)
+	w.BaseRenderable.SetMinSize(orvyn.NewSize(10, 5))
+	w.BaseRenderable.SetPreferredSize(orvyn.NewSize(20, 10))
 
 	w.maxItemHeight = 1
 
@@ -300,14 +297,6 @@ func (w *Widget[T]) Render() string {
 		Width(contentSize.Width).
 		Height(contentSize.Height).
 		Render(view)
-}
-
-func (w *Widget[T]) GetMinSize() orvyn.Size {
-	return w.MinSize
-}
-
-func (w *Widget[T]) GetPreferredSize() orvyn.Size {
-	return w.PreferredSize
 }
 
 func (w *Widget[T]) OnFocus() {
