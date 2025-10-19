@@ -220,14 +220,24 @@ func (w *Widget[T]) paginatorUpdate() {
 	var perPage int
 
 	contentSize := w.GetContentSize()
+	total := 0
+	calcHeight := 0
 
 	for _, li := range w.listItems {
 		li.Resize(contentSize)
 
-		w.maxItemHeight = max(w.maxItemHeight, li.GetSize().Height)
+		height := li.GetSize().Height
+
+		w.maxItemHeight = max(w.maxItemHeight, height)
+
+		total += height
 	}
 
-	calcHeight := contentSize.Height - 1 // paginator
+	calcHeight = contentSize.Height
+
+	if total > contentSize.Height {
+		calcHeight -= 1 // paginator
+	}
 
 	if w.filterable {
 		calcHeight -= w.tiFilter.GetSize().Height
