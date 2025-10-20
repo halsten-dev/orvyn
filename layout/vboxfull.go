@@ -1,16 +1,18 @@
 package layout
 
 import (
-	"github.com/halsten-dev/orvyn"
 	"strings"
+
+	"github.com/halsten-dev/orvyn"
 )
 
 type VBoxFullLayout struct {
 	orvyn.BaseLayout
 
-	margin    orvyn.Size
-	growIndex int
-	maxWidth  bool
+	margin     orvyn.Size
+	growIndex  int
+	growWidget orvyn.Renderable
+	maxWidth   bool
 }
 
 func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Renderable) *VBoxFullLayout {
@@ -18,6 +20,7 @@ func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Render
 
 	l.BaseLayout = orvyn.NewBaseLayout(elements)
 	l.growIndex = growIndex
+	l.growWidget = elements[growIndex]
 	l.maxWidth = false
 	l.margin = margin
 
@@ -29,6 +32,7 @@ func NewMaxWidthVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvy
 
 	l.BaseLayout = orvyn.NewBaseLayout(elements)
 	l.growIndex = growIndex
+	l.growWidget = elements[growIndex]
 	l.maxWidth = true
 	l.margin = margin
 
@@ -41,7 +45,9 @@ func (l *VBoxFullLayout) Render() string {
 	var minSize orvyn.Size
 	var prefSize orvyn.Size
 
-	if len(l.GetElements()) == 0 {
+	visibleElements := l.GetElements()
+
+	if len(visibleElements) == 0 {
 		return ""
 	}
 
@@ -60,8 +66,11 @@ func (l *VBoxFullLayout) Render() string {
 		}
 	}
 
-	for i, e := range l.GetElements() {
-		if i == l.growIndex {
+	for _, e := range visibleElements {
+		// if i == l.growIndex {
+		// 	continue
+		// }
+		if e != l.growWidget {
 			continue
 		}
 
@@ -70,12 +79,13 @@ func (l *VBoxFullLayout) Render() string {
 		e.Resize(elementSize)
 	}
 
-	for i, e := range l.GetElements() {
+	for i, e := range visibleElements {
 		if i > 0 {
 			b.WriteString("\n")
 		}
 
-		if i == l.growIndex {
+		// if i == l.growIndex {
+		if e == l.growWidget {
 			e.Resize(l.calculateGrowSize(elementSize, layoutSize))
 		}
 
