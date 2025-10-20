@@ -10,7 +10,6 @@ type VBoxFullLayout struct {
 	orvyn.BaseLayout
 
 	margin     orvyn.Size
-	growIndex  int
 	growWidget orvyn.Renderable
 	maxWidth   bool
 }
@@ -19,7 +18,6 @@ func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Render
 	l := new(VBoxFullLayout)
 
 	l.BaseLayout = orvyn.NewBaseLayout(elements)
-	l.growIndex = growIndex
 	l.growWidget = elements[growIndex]
 	l.maxWidth = false
 	l.margin = margin
@@ -31,7 +29,6 @@ func NewMaxWidthVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvy
 	l := new(VBoxFullLayout)
 
 	l.BaseLayout = orvyn.NewBaseLayout(elements)
-	l.growIndex = growIndex
 	l.growWidget = elements[growIndex]
 	l.maxWidth = true
 	l.margin = margin
@@ -67,9 +64,6 @@ func (l *VBoxFullLayout) Render() string {
 	}
 
 	for _, e := range visibleElements {
-		// if i == l.growIndex {
-		// 	continue
-		// }
 		if e != l.growWidget {
 			continue
 		}
@@ -84,7 +78,6 @@ func (l *VBoxFullLayout) Render() string {
 			b.WriteString("\n")
 		}
 
-		// if i == l.growIndex {
 		if e == l.growWidget {
 			e.Resize(l.calculateGrowSize(elementSize, layoutSize))
 		}
@@ -98,8 +91,8 @@ func (l *VBoxFullLayout) Render() string {
 func (l *VBoxFullLayout) calculateGrowSize(elementSize, layoutSize orvyn.Size) orvyn.Size {
 	totalHeight := layoutSize.Height
 
-	for i, e := range l.GetElements() {
-		if i == l.growIndex {
+	for _, e := range l.GetElements() {
+		if e == l.growWidget {
 			continue
 		}
 
