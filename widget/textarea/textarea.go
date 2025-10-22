@@ -62,7 +62,7 @@ func (w *Widget) Resize(size orvyn.Size) {
 	w.BaseWidget.Resize(size)
 
 	w.Model.SetWidth(size.Width)
-	w.Model.SetHeight(size.Height)
+	w.Model.SetHeight(size.Height - 1) // Why ?
 
 	focused := w.Model.Focused()
 	if !focused {
