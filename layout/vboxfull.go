@@ -64,7 +64,7 @@ func (l *VBoxFullLayout) Render() string {
 	}
 
 	for _, e := range visibleElements {
-		if e != l.growWidget {
+		if e == l.growWidget {
 			continue
 		}
 
