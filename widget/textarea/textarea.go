@@ -61,10 +61,8 @@ func (w *Widget) Render() string {
 func (w *Widget) Resize(size orvyn.Size) {
 	w.BaseWidget.Resize(size)
 
-	contentSize := w.GetContentSize()
-
 	w.Model.SetWidth(size.Width)
-	w.Model.SetHeight(contentSize.Height)
+	w.Model.SetHeight(size.Height)
 
 	focused := w.Model.Focused()
 	if !focused {
