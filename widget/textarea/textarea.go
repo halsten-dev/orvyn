@@ -12,24 +12,19 @@ type Widget struct {
 	orvyn.BaseFocusable
 
 	textarea.Model
-
-	MinHeight       int
-	PreferredHeight int
 }
 
 func New() *Widget {
 	w := new(Widget)
 
 	w.BaseWidget = orvyn.NewBaseWidget()
+	w.BaseFocusable = orvyn.NewBaseFocusable(w)
 
 	w.Model = textarea.New()
 	w.Model.Prompt = ""
 	w.Model.SetWidth(10)
 
 	w.OnBlur()
-
-	w.MinHeight = 1
-	w.PreferredHeight = 5
 
 	return w
 }
@@ -48,11 +43,13 @@ func (w *Widget) Update(msg tea.Msg) tea.Cmd {
 }
 
 func (w *Widget) OnFocus() {
+	w.BaseFocusable.OnFocus()
 	w.updateStyle()
 	w.Model.Focus()
 }
 
 func (w *Widget) OnBlur() {
+	w.BaseFocusable.OnBlur()
 	w.updateStyle()
 	w.Model.Blur()
 }
@@ -79,14 +76,6 @@ func (w *Widget) Resize(size orvyn.Size) {
 	if !focused {
 		w.Model.Blur()
 	}
-}
-
-func (w *Widget) GetMinSize() orvyn.Size {
-	return orvyn.NewSize(20, w.MinHeight)
-}
-
-func (w *Widget) GetPreferredSize() orvyn.Size {
-	return orvyn.NewSize(50, w.PreferredHeight)
 }
 
 func (w *Widget) OnEnterInput() {}
