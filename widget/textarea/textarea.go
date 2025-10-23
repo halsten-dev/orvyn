@@ -3,6 +3,7 @@ package textarea
 import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/theme"
 )
@@ -55,14 +56,21 @@ func (w *Widget) OnBlur() {
 }
 
 func (w *Widget) Render() string {
-	return w.Model.View()
+	contentSize := w.GetContentSize()
+
+	return w.GetStyle().
+		Width(contentSize.Width).
+		Height(contentSize.Height).
+		Render(w.Model.View())
 }
 
 func (w *Widget) Resize(size orvyn.Size) {
 	w.BaseWidget.Resize(size)
 
-	w.Model.SetWidth(size.Width)
-	w.Model.SetHeight(size.Height - 1) // Why ?
+	contentSize := w.GetContentSize()
+
+	w.Model.SetWidth(contentSize.Width)
+	w.Model.SetHeight(contentSize.Height)
 
 	focused := w.Model.Focused()
 	if !focused {
@@ -84,10 +92,10 @@ func (w *Widget) updateStyle() {
 	t := orvyn.GetTheme()
 
 	w.BlurredStyle.Text = t.Style(theme.NormalTextStyleID)
-	w.BlurredStyle.Base = t.Style(theme.BlurredWidgetStyleID)
+	w.BlurredStyle.Base = lipgloss.NewStyle()
 	w.BlurredStyle.CursorLine = t.Style(theme.NormalTextStyleID)
 	w.FocusedStyle.Text = t.Style(theme.NormalTextStyleID)
-	w.FocusedStyle.Base = t.Style(theme.FocusedWidgetStyleID)
+	w.FocusedStyle.Base = lipgloss.NewStyle()
 	w.FocusedStyle.CursorLine = t.Style(theme.NormalTextStyleID)
 	w.Cursor.TextStyle = t.Style(theme.NormalTextStyleID)
 	w.Cursor.Style = t.Style(theme.NormalTextStyleID)
