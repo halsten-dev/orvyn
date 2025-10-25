@@ -2,6 +2,8 @@ package listdemo
 
 import (
 	"fmt"
+
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/layout"
@@ -12,6 +14,8 @@ type Screen struct {
 	stringList   *list.Widget[string]
 	stringValues []string
 
+	elementIndex int
+
 	layout *layout.CenterLayout
 }
 
@@ -19,6 +23,9 @@ func New() *Screen {
 	s := new(Screen)
 
 	s.stringList = list.New(list.SimpleListItemConstructor)
+	s.stringList.AutoFocusNewItem = true
+
+	s.elementIndex = 0
 
 	s.layout = layout.NewCenterLayout(s.stringList)
 
@@ -26,17 +33,9 @@ func New() *Screen {
 }
 
 func (s *Screen) OnEnter(a any) tea.Cmd {
-	s.stringValues = make([]string, 60)
+	s.stringValues = make([]string, 0)
 
-	for i := 0; i < len(s.stringValues); i++ {
-		mod := "a"
-
-		if i%2 == 0 {
-			mod = "b"
-		}
-
-		s.stringValues[i] = fmt.Sprintf("String %s %d", mod, i)
-	}
+	s.elementIndex = 0
 
 	s.stringList.SetItems(s.stringValues)
 
@@ -48,9 +47,21 @@ func (s *Screen) OnExit() any {
 }
 
 func (s *Screen) Update(msg tea.Msg) tea.Cmd {
-	s.stringList.Update(msg)
+	if m, ok := orvyn.GetKeyMsg(msg); ok {
+		switch {
+		case key.Matches(m, key.NewBinding(key.WithKeys("n"))):
+			s.stringList.AppendItem(fmt.Sprintf("Test %d", s.elementIndex))
+			s.elementIndex++
 
-	return nil
+		case key.Matches(m, key.NewBinding(key.WithKeys("i"))):
+			s.stringList.InsertItem(s.stringList.GetGlobalIndex(), fmt.Sprintf("Test Insert %d", s.elementIndex))
+			s.elementIndex++
+		}
+	}
+
+	cmd := s.stringList.Update(msg)
+
+	return cmd
 }
 
 func (s *Screen) Render() orvyn.Layout {

@@ -11,8 +11,8 @@ import (
 type App struct{}
 
 func (a App) Init() tea.Cmd {
-	return orvyn.SwitchScreen(screen.InputWidgetDemoScreenID)
-	// return orvyn.SwitchScreen(screen.ListDemoScreenID)
+	// return orvyn.SwitchScreen(screen.InputWidgetDemoScreenID)
+	return orvyn.SwitchScreen(screen.ListDemoScreenID)
 }
 
 func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

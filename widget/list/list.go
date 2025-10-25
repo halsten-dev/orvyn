@@ -572,9 +572,7 @@ func (w *Widget[T]) SetItem(index int, data T) {
 }
 
 func (w *Widget[T]) AppendItem(data T) {
-	w.clearFilter()
-
-	index := len(w.listItems) - 1
+	index := len(w.listItems)
 
 	widget := w.itemConstructor(data)
 
@@ -596,8 +594,6 @@ func (w *Widget[T]) AppendItem(data T) {
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
-	w.clearFilter()
-
 	if len(w.listItems) == 0 {
 		w.AppendItem(data)
 		return

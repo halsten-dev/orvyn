@@ -58,6 +58,7 @@ func (f *FocusManager) Insert(index int, widget Focusable) {
 	}
 
 	f.widgets = append(f.widgets[:index+1], f.widgets[index:]...)
+	f.widgets[index] = widget
 
 	if index <= f.tabIndex {
 		f.tabIndex = f.getNextIndex()
