@@ -96,10 +96,10 @@ func (l *VBoxFullLayout) calculateGrowSize(elementSize, layoutSize orvyn.Size) o
 			continue
 		}
 
-		height := e.GetMinSize().Height
+		height := e.GetSize().Height
 
 		if height == 0 {
-			height = e.GetSize().Height
+			height = e.GetMinSize().Height
 		}
 
 		totalHeight -= height
