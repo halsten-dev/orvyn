@@ -162,6 +162,8 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 			case key.Matches(msg, w.keybinds.clearFilter):
 				w.clearFilter()
 
+				w.FocusFirst()
+
 				return nil
 			}
 		}
@@ -193,6 +195,8 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 			case key.Matches(msg, w.keybinds.clearFilter):
 				if w.filterState == FilterApplied {
 					w.clearFilter()
+
+					w.FocusFirst()
 
 					return nil
 				}
@@ -572,6 +576,8 @@ func (w *Widget[T]) SetItem(index int, data T) {
 }
 
 func (w *Widget[T]) AppendItem(data T) {
+	w.clearFilter()
+
 	index := len(w.listItems)
 
 	widget := w.itemConstructor(data)
@@ -594,6 +600,8 @@ func (w *Widget[T]) AppendItem(data T) {
 }
 
 func (w *Widget[T]) InsertItem(index int, data T) {
+	w.clearFilter()
+
 	if len(w.listItems) == 0 {
 		w.AppendItem(data)
 		return
@@ -616,6 +624,10 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 		w.globalIndex = index
 		w.moveCursor(w.globalIndex)
 		w.focusManager.Focus(w.globalIndex)
+	} else {
+		if index <= w.globalIndex {
+			w.NextItem()
+		}
 	}
 }
 
@@ -706,8 +718,6 @@ func (w *Widget[T]) clearFilter() {
 	}
 
 	w.filterState = Unfiltered
-
-	w.FocusFirst()
 
 	w.paginatorUpdate()
 }

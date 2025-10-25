@@ -23,7 +23,7 @@ func New() *Screen {
 	s := new(Screen)
 
 	s.stringList = list.New(list.SimpleListItemConstructor)
-	s.stringList.AutoFocusNewItem = true
+	s.stringList.AutoFocusNewItem = false
 
 	s.elementIndex = 0
 
