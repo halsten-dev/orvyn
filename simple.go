@@ -43,3 +43,23 @@ func (s *SimpleRenderable) Render() string {
 	return s.Style.Width(size.Width).
 		Height(size.Height).Render(s.value)
 }
+
+func (s *SimpleRenderable) GetMinSize() Size {
+	vFrame, hFrame := s.Style.GetFrameSize()
+
+	if vFrame+hFrame == 0 {
+		s.BaseRenderable.GetMinSize()
+	}
+
+	return GetRenderSize(s.Style, "min")
+}
+
+func (s *SimpleRenderable) GetPreferredSize() Size {
+	vFrame, hFrame := s.Style.GetFrameSize()
+
+	if vFrame+hFrame == 0 {
+		s.BaseRenderable.GetPreferredSize()
+	}
+
+	return GetRenderSize(s.Style, "pref")
+}
