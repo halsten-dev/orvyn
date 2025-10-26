@@ -67,10 +67,11 @@ type Widget[T any] struct {
 	orvyn.BaseWidget
 	orvyn.BaseFocusable
 
-	InfiniteScroll   bool
-	AutoFocusNewItem bool
-	filterable       bool
-	filterState      FilterState
+	InfiniteScroll            bool
+	AutoFocusNewItem          bool
+	filterable                bool
+	blockCursorMovingCallback bool
+	filterState               FilterState
 
 	cursor      int
 	globalIndex int
@@ -115,6 +116,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.InfiniteScroll = false
 	w.AutoFocusNewItem = false
 	w.filterable = true
+	w.blockCursorMovingCallback = false
 	w.filterState = Unfiltered
 
 	w.cursor = 0
@@ -650,10 +652,12 @@ func (w *Widget[T]) MoveItem(startIndex, destIndex int) {
 	autoFocus := w.AutoFocusNewItem
 
 	w.AutoFocusNewItem = true
+	w.blockCursorMovingCallback = true
 
 	w.InsertItem(destIndex, item.GetData())
 
 	w.AutoFocusNewItem = autoFocus
+	w.blockCursorMovingCallback = false
 }
 
 func (w *Widget[T]) RemoveItem(index int) {
@@ -669,7 +673,11 @@ func (w *Widget[T]) RemoveItem(index int) {
 
 	w.paginatorUpdate()
 
+	w.blockCursorMovingCallback = true
+
 	w.PreviousItem()
+
+	w.blockCursorMovingCallback = false
 
 	w.focusManager.Focus(w.globalIndex)
 }
@@ -773,6 +781,10 @@ func (w *Widget[T]) getFilteredGlobalIndex() int {
 }
 
 func (w *Widget[T]) callCursorMovingCallback(index int) {
+	if w.blockCursorMovingCallback {
+		return
+	}
+
 	if index < 0 || index >= len(w.listItems) {
 		return
 	}
