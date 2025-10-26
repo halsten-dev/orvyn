@@ -602,7 +602,9 @@ func (w *Widget[T]) AppendItem(data T) {
 func (w *Widget[T]) InsertItem(index int, data T) {
 	w.clearFilter()
 
-	if len(w.listItems) == 0 {
+	length := len(w.listItems)
+
+	if length == 0 || index >= length {
 		w.AppendItem(data)
 		return
 	}
@@ -629,6 +631,29 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 			w.NextItem()
 		}
 	}
+}
+
+func (w *Widget[T]) MoveItem(startIndex, destIndex int) {
+	w.clearFilter()
+
+	if startIndex < 0 || startIndex >= len(w.listItems) {
+		return
+	}
+
+	if destIndex < 0 || destIndex > len(w.listItems) {
+		return
+	}
+
+	item := w.listItems[startIndex]
+	w.RemoveItem(startIndex)
+
+	autoFocus := w.AutoFocusNewItem
+
+	w.AutoFocusNewItem = true
+
+	w.InsertItem(destIndex, item.GetData())
+
+	w.AutoFocusNewItem = autoFocus
 }
 
 func (w *Widget[T]) RemoveItem(index int) {
@@ -705,6 +730,10 @@ func (w *Widget[T]) basicFilter(s string) {
 	w.paginatorUpdate()
 
 	w.FocusFirst()
+}
+
+func (w *Widget[T]) Length() int {
+	return len(w.listItems)
 }
 
 func (w *Widget[T]) clearFilter() {

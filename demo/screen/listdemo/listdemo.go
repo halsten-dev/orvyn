@@ -50,12 +50,28 @@ func (s *Screen) Update(msg tea.Msg) tea.Cmd {
 	if m, ok := orvyn.GetKeyMsg(msg); ok {
 		switch {
 		case key.Matches(m, key.NewBinding(key.WithKeys("n"))):
-			s.stringList.AppendItem(fmt.Sprintf("Test %d", s.elementIndex))
-			s.elementIndex++
+			if s.stringList.FilterState() != list.Filtering {
+				s.stringList.AppendItem(fmt.Sprintf("Test %d", s.elementIndex))
+				s.elementIndex++
+			}
 
 		case key.Matches(m, key.NewBinding(key.WithKeys("i"))):
-			s.stringList.InsertItem(s.stringList.GetGlobalIndex(), fmt.Sprintf("Test Insert %d", s.elementIndex))
-			s.elementIndex++
+			if s.stringList.FilterState() != list.Filtering {
+				s.stringList.InsertItem(s.stringList.GetGlobalIndex(), fmt.Sprintf("Test Insert %d", s.elementIndex))
+				s.elementIndex++
+			}
+
+		case key.Matches(m, key.NewBinding(key.WithKeys("shift+up"))):
+			currentIndex := s.stringList.GetGlobalIndex()
+			if currentIndex > 0 {
+				s.stringList.MoveItem(currentIndex, currentIndex-1)
+			}
+
+		case key.Matches(m, key.NewBinding(key.WithKeys("shift+down"))):
+			currentIndex := s.stringList.GetGlobalIndex()
+			if currentIndex < s.stringList.Length()-1 {
+				s.stringList.MoveItem(currentIndex, currentIndex+1)
+			}
 		}
 	}
 
