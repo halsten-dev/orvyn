@@ -645,7 +645,7 @@ func (w *Widget[T]) MoveItem(startIndex, destIndex int) {
 	}
 
 	item := w.listItems[startIndex]
-	w.RemoveItem(startIndex)
+	w.removeItem(startIndex)
 
 	autoFocus := w.AutoFocusNewItem
 
@@ -661,8 +661,7 @@ func (w *Widget[T]) RemoveItem(index int) {
 		return
 	}
 
-	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
-	w.focusManager.Remove(index)
+	w.removeItem(index)
 
 	if w.filterState == FilterApplied {
 		w.basicFilter(w.tiFilter.Value())
@@ -673,6 +672,15 @@ func (w *Widget[T]) RemoveItem(index int) {
 	w.PreviousItem()
 
 	w.focusManager.Focus(w.globalIndex)
+}
+
+func (w *Widget[T]) removeItem(index int) {
+	if index < 0 || index >= len(w.listItems) {
+		return
+	}
+
+	w.listItems = append(w.listItems[:index], w.listItems[index+1:]...)
+	w.focusManager.Remove(index)
 }
 
 func (w *Widget[T]) FocusFirst() {
