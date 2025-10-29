@@ -1,6 +1,8 @@
 package orvyn
 
 import (
+	"slices"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -48,12 +50,20 @@ func NewFocusManager() *FocusManager {
 // Add append the given Focusable Widget to the manager.
 // Order of append defines the focus order.
 func (f *FocusManager) Add(widget Focusable) {
+	if slices.Contains(f.widgets, widget) {
+		return
+	}
+
 	f.widgets = append(f.widgets, widget)
 }
 
 // Insert add a Focusable Widget at the given index.
 func (f *FocusManager) Insert(index int, widget Focusable) {
 	if index < 0 || index >= len(f.widgets) {
+		return
+	}
+
+	if slices.Contains(f.widgets, widget) {
 		return
 	}
 
