@@ -82,7 +82,9 @@ func (f *FocusManager) Remove(index int) {
 
 	f.widgets = append(f.widgets[:index], f.widgets[index+1:]...)
 
-	f.tabIndex = f.getPreviousIndex()
+	if f.tabIndex == index {
+		f.tabIndex = f.getPreviousIndex()
+	}
 }
 
 // RemoveWidget removes the widget from the manager base on the given Focusable.
