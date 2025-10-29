@@ -85,6 +85,17 @@ func (f *FocusManager) Remove(index int) {
 	f.tabIndex = f.getPreviousIndex()
 }
 
+// RemoveWidget removes the widget from the manager base on the given Focusable.
+// Need to be a pointer for this function to work as expected.
+func (f *FocusManager) RemoveWidget(widget Focusable) {
+	for i, w := range f.widgets {
+		if w == widget {
+			f.Remove(i)
+			return
+		}
+	}
+}
+
 // SetWidgets replaces the manager widget list with the one given.
 // Widget order defines the focus order.
 func (f *FocusManager) SetWidgets(widgets []Focusable) {
