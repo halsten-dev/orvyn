@@ -5,12 +5,12 @@ import (
 )
 
 type DefaultDarkTheme struct {
-	theme Theme
+	Theme Theme
 }
 
 func NewDefaultDarkTheme() *DefaultDarkTheme {
 	d := &DefaultDarkTheme{}
-	d.theme = d
+	d.Theme = d
 
 	return d
 }
@@ -22,59 +22,59 @@ func (d DefaultDarkTheme) Style(style StyleID) lipgloss.Style {
 
 	switch style {
 	case TitleStyleID:
-		s = s.Bold(true).Foreground(d.theme.Color(TitleFontColorID))
+		s = s.Bold(true).Foreground(d.Theme.Color(TitleFontColorID))
 
 	case NeutralTextStyleID:
-		s = s.Foreground(d.theme.Color(NeutralFontColorID))
+		s = s.Foreground(d.Theme.Color(NeutralFontColorID))
 
 	case NeutralDimTextStyleID:
-		s = s.Foreground(d.theme.Color(NeutralDimFontColorID))
+		s = s.Foreground(d.Theme.Color(NeutralDimFontColorID))
 
 	case NormalTextStyleID:
-		s = s.Foreground(d.theme.Color(NormalFontColorID))
+		s = s.Foreground(d.Theme.Color(NormalFontColorID))
 
 	case HighlightTextStyleID:
-		s = s.Foreground(d.theme.Color(HighlightFontColorID))
+		s = s.Foreground(d.Theme.Color(HighlightFontColorID))
 
 	case DimTextStyleID:
-		s = s.Foreground(d.theme.Color(DimFontColorID))
+		s = s.Foreground(d.Theme.Color(DimFontColorID))
 
 	case DimSecondaryTextStyleID:
-		s = s.Italic(true).Foreground(d.theme.Color(DimFontColorID))
+		s = s.Italic(true).Foreground(d.Theme.Color(DimFontColorID))
 
 	case FocusedWidgetStyleID:
 		s = s.Border(lipgloss.RoundedBorder()).
-			BorderForeground(d.theme.Color(FocusedBorderColorID))
+			BorderForeground(d.Theme.Color(FocusedBorderColorID))
 
 	case BlurredWidgetStyleID:
 		s = s.Border(lipgloss.RoundedBorder()).
-			BorderForeground(d.theme.Color(BlurredBorderColorID))
+			BorderForeground(d.Theme.Color(BlurredBorderColorID))
 
 	case PaginatorActiveStyleID:
-		s = s.Bold(true).Foreground(d.theme.Color(NormalFontColorID))
+		s = s.Bold(true).Foreground(d.Theme.Color(NormalFontColorID))
 
 	case PaginatorInactiveStyleID:
-		s = s.Foreground(d.theme.Color(DimFontColorID))
+		s = s.Foreground(d.Theme.Color(DimFontColorID))
 
 	case StatusErrorTextStyleID:
 		s = s.AlignHorizontal(lipgloss.Center).
-			Bold(true).Foreground(d.theme.Color(StatusErrorFontColorID))
+			Bold(true).Foreground(d.Theme.Color(StatusErrorFontColorID))
 
 	case StatusSuccessTextStyleID:
 		s = s.AlignHorizontal(lipgloss.Center).
-			Bold(true).Foreground(d.theme.Color(StatusSuccessFontColorID))
+			Bold(true).Foreground(d.Theme.Color(StatusSuccessFontColorID))
 
 	case StatusWarningTextStyleID:
 		s = s.AlignHorizontal(lipgloss.Center).
-			Foreground(d.theme.Color(StatusWarningFontColorID))
+			Foreground(d.Theme.Color(StatusWarningFontColorID))
 
 	case StatusInformationTextStyleID:
 		s = s.AlignHorizontal(lipgloss.Center).
-			Foreground(d.theme.Color(StatusInformationFontColorID))
+			Foreground(d.Theme.Color(StatusInformationFontColorID))
 
 	case StatusNeutralTextStyleID:
 		s = s.AlignHorizontal(lipgloss.Center).
-			Foreground(d.theme.Color(StatusNeutralFontColorID))
+			Foreground(d.Theme.Color(StatusNeutralFontColorID))
 
 	}
 
