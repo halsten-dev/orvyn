@@ -38,7 +38,7 @@ func Init() {
 	ProcessExit = true
 	WindowSize = NewSize(100, 100)
 	screens = make(map[ScreenID]Screen)
-	activeTheme = theme.DefaultDarkTheme{}
+	activeTheme = theme.NewDefaultDarkTheme()
 }
 
 func Update(msg tea.Msg) tea.Cmd {
