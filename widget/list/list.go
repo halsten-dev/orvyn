@@ -729,7 +729,7 @@ func (w *Widget[T]) basicFilter(s string) {
 	w.filteredListItems = make(filteredItems[T], 0)
 
 	for i, v := range w.listItems {
-		if strings.Contains(v.FilterValue(), s) {
+		if strings.Contains(strings.ToLower(v.FilterValue()), strings.ToLower(s)) {
 			w.filteredListItems = append(w.filteredListItems, filteredItem[T]{
 				index: i,
 				item:  &w.listItems[i],
