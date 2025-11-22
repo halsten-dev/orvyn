@@ -1,8 +1,9 @@
 package layout
 
 import (
-	"github.com/halsten-dev/orvyn"
 	"strings"
+
+	"github.com/halsten-dev/orvyn"
 )
 
 // VBoxLayout arranges elements vertically with flexible width (base on the largest width).
@@ -16,20 +17,20 @@ type VBoxLayout struct {
 	maxWidth bool
 }
 
-func NewVBoxLayout(margin int, elements []orvyn.Renderable) *VBoxLayout {
+func NewVBoxLayout(margin int, elements ...orvyn.Renderable) *VBoxLayout {
 	l := new(VBoxLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 	l.margin = margin
 	l.maxWidth = false
 
 	return l
 }
 
-func NewMaxWidthVBoxLayout(margin int, elements []orvyn.Renderable) *VBoxLayout {
+func NewMaxWidthVBoxLayout(margin int, elements ...orvyn.Renderable) *VBoxLayout {
 	l := new(VBoxLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 	l.margin = margin
 	l.maxWidth = true
 

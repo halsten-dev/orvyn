@@ -13,7 +13,7 @@ type CenterLayout struct {
 func NewCenterLayout(element orvyn.Renderable) *CenterLayout {
 	l := new(CenterLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout([]orvyn.Renderable{element})
+	l.BaseLayout = orvyn.NewBaseLayout(element)
 
 	return l
 }

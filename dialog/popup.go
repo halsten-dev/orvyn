@@ -71,10 +71,8 @@ func NewPopup(config Config) *PopupDialog {
 
 	s.layout = layout.NewCenterLayout(
 		layout.NewVBoxLayout(10,
-			[]orvyn.Renderable{
-				s.content,
-				s.options,
-			},
+			s.content,
+			s.options,
 		),
 	)
 

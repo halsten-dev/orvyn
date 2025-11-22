@@ -35,10 +35,10 @@ type HBoxFixedRatio struct {
 }
 
 func NewHBoxFixedRatioLayout(margin int, gap,
-	compensatorIndex int, elements []FixedRatioRenderable) *HBoxFixedRatio {
+	compensatorIndex int, elements ...FixedRatioRenderable) *HBoxFixedRatio {
 	l := new(HBoxFixedRatio)
 
-	l.BaseLayout = orvyn.NewBaseLayout([]orvyn.Renderable{})
+	l.BaseLayout = orvyn.NewBaseLayout()
 
 	l.margin = margin
 	l.gap = gap

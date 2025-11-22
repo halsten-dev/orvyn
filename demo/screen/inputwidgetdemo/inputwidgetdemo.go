@@ -33,11 +33,9 @@ func New() *Screen {
 
 	s.layout = layout.NewCenterLayout(
 		layout.NewDefinedWidthVerticalLayout(30, 120, 10,
-			[]orvyn.Renderable{
-				s.tiDemo,
-				s.taDemo,
-				s.cbDemo,
-			},
+			s.tiDemo,
+			s.taDemo,
+			s.cbDemo,
 		),
 	)
 

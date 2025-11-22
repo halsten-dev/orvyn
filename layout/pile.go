@@ -9,10 +9,10 @@ type PileLayout struct {
 	orvyn.BaseLayout
 }
 
-func NewPileLayout(elements []orvyn.Renderable) *PileLayout {
+func NewPileLayout(elements ...orvyn.Renderable) *PileLayout {
 	l := new(PileLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 
 	return l
 }

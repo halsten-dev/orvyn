@@ -1,10 +1,11 @@
 package layout
 
 import (
-	"github.com/charmbracelet/lipgloss"
-	"github.com/halsten-dev/orvyn"
 	"math"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/halsten-dev/orvyn"
 )
 
 // HBoxGrowLayout is a layout that uniformize the height of all the elements
@@ -27,10 +28,10 @@ type HBoxGrowLayout struct {
 // gap : defines the space between every element.
 // compensatorIndex : specify which element of the layout will take the compensation size
 // to match the layout size.
-func NewHBoxGrowLayout(gap, compensatorIndex int, elements []orvyn.Renderable) *HBoxGrowLayout {
+func NewHBoxGrowLayout(gap, compensatorIndex int, elements ...orvyn.Renderable) *HBoxGrowLayout {
 	l := new(HBoxGrowLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 	l.gap = gap
 	l.compensatorIndex = compensatorIndex
 	l.fullHeight = false
@@ -42,8 +43,8 @@ func NewHBoxGrowLayout(gap, compensatorIndex int, elements []orvyn.Renderable) *
 // gap : defines the space between every element.
 // compensatorIndex : specify which element of the layout will take the compensation size
 // to match the layout size.
-func NewHBoxGrowFullHeightLayout(gap, compensatorIndex int, elements []orvyn.Renderable) *HBoxGrowLayout {
-	l := NewHBoxGrowLayout(gap, compensatorIndex, elements)
+func NewHBoxGrowFullHeightLayout(gap, compensatorIndex int, elements ...orvyn.Renderable) *HBoxGrowLayout {
+	l := NewHBoxGrowLayout(gap, compensatorIndex, elements...)
 
 	l.fullHeight = true
 

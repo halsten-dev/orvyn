@@ -17,7 +17,7 @@ type BaseLayout struct {
 }
 
 // NewBaseLayout creates a new BaseLayout and returns it.
-func NewBaseLayout(elements []Renderable) BaseLayout {
+func NewBaseLayout(elements ...Renderable) BaseLayout {
 	b := BaseLayout{}
 
 	b.BaseRenderable = NewBaseRenderable()

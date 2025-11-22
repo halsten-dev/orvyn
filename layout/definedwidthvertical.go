@@ -26,10 +26,10 @@ type DefinedWidthVerticalLayout struct {
 	flexibleHeightElements []flexibleHeightElement
 }
 
-func NewDefinedWidthVerticalLayout(minWidth int, prefWidth int, margin int, elements []orvyn.Renderable) *DefinedWidthVerticalLayout {
+func NewDefinedWidthVerticalLayout(minWidth int, prefWidth int, margin int, elements ...orvyn.Renderable) *DefinedWidthVerticalLayout {
 	l := new(DefinedWidthVerticalLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 
 	l.MinWidth = minWidth
 	l.PreferredWidth = prefWidth

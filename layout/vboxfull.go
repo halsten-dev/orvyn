@@ -14,10 +14,10 @@ type VBoxFullLayout struct {
 	maxWidth   bool
 }
 
-func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Renderable) *VBoxFullLayout {
+func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements ...orvyn.Renderable) *VBoxFullLayout {
 	l := new(VBoxFullLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 	l.growWidget = elements[growIndex]
 	l.maxWidth = false
 	l.margin = margin
@@ -25,10 +25,10 @@ func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Render
 	return l
 }
 
-func NewMaxWidthVBoxFullLayout(margin orvyn.Size, growIndex int, elements []orvyn.Renderable) *VBoxFullLayout {
+func NewMaxWidthVBoxFullLayout(margin orvyn.Size, growIndex int, elements ...orvyn.Renderable) *VBoxFullLayout {
 	l := new(VBoxFullLayout)
 
-	l.BaseLayout = orvyn.NewBaseLayout(elements)
+	l.BaseLayout = orvyn.NewBaseLayout(elements...)
 	l.growWidget = elements[growIndex]
 	l.maxWidth = true
 	l.margin = margin
