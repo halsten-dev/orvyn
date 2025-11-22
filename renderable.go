@@ -4,18 +4,34 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Renderable interface defines any orvyn element that can be rendered.
 type Renderable interface {
+	// Activable compose the Renderable with the Activable interface
 	Activable
 
+	// Render is the way the renderable should be rendered.
 	Render() string
+
+	// Resize will be called when the renderable is resized by the layout.
 	Resize(Size)
+
+	// GetSize returns the current size of the Renderable.
 	GetSize() Size
+
+	// SetMinSize allows to set the minimal size of the Renderable.
 	SetMinSize(Size)
+
+	// GetMinSize returns the minimal size of the Renderable.
 	GetMinSize() Size
+
+	// SetPreferredSize allows to set the preferred size of the Renderable.
 	SetPreferredSize(Size)
+
+	// GetPreferredSize returns the preferred size of the Renderable.
 	GetPreferredSize() Size
 }
 
+// BaseRenderable is usefull to bring default implementation of the Renderable interface.
 type BaseRenderable struct {
 	BaseActivable
 
@@ -24,6 +40,7 @@ type BaseRenderable struct {
 	preferredSize Size
 }
 
+// NewBaseRenderable facilitates the creation of a new BaseRenderable and returns it.
 func NewBaseRenderable() BaseRenderable {
 	b := BaseRenderable{}
 

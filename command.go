@@ -1,10 +1,12 @@
 package orvyn
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
+// TickMsg simplify and assure the right tick msg management with a unique Tag.
 type TickMsg struct {
 	Time time.Time
 	Tag  uint
@@ -19,6 +21,7 @@ func TickCmd(seconds time.Duration, tag uint) tea.Cmd {
 	})
 }
 
+// DialogExitMsg is the message sent when an Orvyn dialog is exited.
 type DialogExitMsg struct {
 	DialogID ScreenID
 	Param    any

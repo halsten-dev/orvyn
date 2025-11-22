@@ -4,17 +4,25 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// SimpleRenderable represents a very basic and reusable renderable.
 type SimpleRenderable struct {
+	// BaseRenderable composing
 	BaseRenderable
 
-	Style          lipgloss.Style
+	// Style is the style that will be used to render the value of the SimpleRenderable.
+	Style lipgloss.Style
+
+	// SizeConstraint define if the style width and height should be taken into account when rendering the SimpleRenderable.
 	SizeConstraint bool
 
+	// value is the value of the SimpleRenderable.
 	value string
 }
 
+// VGap is a SimpleRenderable representing a new line. Useful for layout building.
 var VGap = NewSimpleRenderable("\n")
 
+// NewSimpleRenderable creates a new SimpleRenderable and returns it.
 func NewSimpleRenderable(value string) *SimpleRenderable {
 	s := new(SimpleRenderable)
 

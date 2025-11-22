@@ -4,6 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// ScreenID type represents an ID for a screen.
 type ScreenID string
 
 // Screen defines behaviour of an Orvyn screen.

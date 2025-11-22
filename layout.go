@@ -1,17 +1,22 @@
 package orvyn
 
+// Layout interface based on Renderable interface.
 type Layout interface {
+	// Renderable composing the Layout interface.
 	Renderable
 
+	// GetElements returns a slice of every active Renderable of the layout.
 	GetElements() []Renderable
 }
 
+// BaseLayout type is used to simplify the creation of custom layout.
 type BaseLayout struct {
 	BaseRenderable
 
 	elements []Renderable
 }
 
+// NewBaseLayout creates a new BaseLayout and returns it.
 func NewBaseLayout(elements []Renderable) BaseLayout {
 	b := BaseLayout{}
 
@@ -21,6 +26,7 @@ func NewBaseLayout(elements []Renderable) BaseLayout {
 	return b
 }
 
+// GetElements returns a slice of activated []Renderable.
 func (b *BaseLayout) GetElements() []Renderable {
 	var visibleElements []Renderable
 
@@ -35,14 +41,11 @@ func (b *BaseLayout) GetElements() []Renderable {
 	return visibleElements
 }
 
+// SetActive change the active state of all elements of the layout and the layout itself.
 func (b *BaseLayout) SetActive(active bool) {
 	for _, e := range b.elements {
 		e.SetActive(active)
 	}
 
 	b.active = active
-}
-
-func (b *BaseLayout) IsActive() bool {
-	return b.active
 }

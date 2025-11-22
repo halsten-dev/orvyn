@@ -11,6 +11,7 @@ func NewSize(width, height int) Size {
 	return Size{width, height}
 }
 
+// SameSize is a helper function to compare two Size and returns true if there are similar.
 func SameSize(s1, s2 Size) bool {
 	if s1 == s2 {
 		return true
@@ -19,6 +20,7 @@ func SameSize(s1, s2 Size) bool {
 	return false
 }
 
+// DivideSizeFull is a helper function that allow to divide a size in 2. The first size returned will have the compensentation to avoid float result.
 func DivideSizeFull(size int) (int, int) {
 	var result int
 
