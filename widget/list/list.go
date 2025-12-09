@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/halsten-dev/orvyn/widget/textinput"
+	"github.com/sahilm/fuzzy"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/paginator"
@@ -26,12 +27,13 @@ type ListItem[T any] interface {
 // T type represents the type of the item data.
 type ItemConstructor[T any] func(T) ListItem[T]
 
-type filteredItem[T any] struct {
-	index int // corresponding global index
-	item  *ListItem[T]
+type FilteredItem struct {
+	Index int // corresponding global index
 }
 
-type filteredItems[T any] []filteredItem[T]
+type FilteredItems []FilteredItem
+
+type ListFilter[T any] func(items *[]ListItem[T], s string) FilteredItems
 
 // FilterState Taken from github.com/charmbracelet/bubbles/list/list.go
 // FilterState describes the current filtering state on the model.
@@ -77,7 +79,7 @@ type Widget[T any] struct {
 	globalIndex int
 
 	listItems         []ListItem[T]
-	filteredListItems filteredItems[T]
+	filteredListItems FilteredItems
 
 	tiFilter *textinput.Widget
 
@@ -93,6 +95,8 @@ type Widget[T any] struct {
 
 	CursorMovingCallback func(int)
 	CursorMovedCallback  func(int)
+
+	Filter ListFilter[T]
 }
 
 // New creates a new *Widget list and takes an itemConstructor as parameter.
@@ -118,6 +122,7 @@ func New[T any](itemConstructor ItemConstructor[T]) *Widget[T] {
 	w.filterable = true
 	w.blockCursorMovingCallback = false
 	w.filterState = Unfiltered
+	w.Filter = FuzzyFilter
 
 	w.cursor = 0
 
@@ -157,7 +162,7 @@ func (w *Widget[T]) Update(msg tea.Msg) tea.Cmd {
 		case tea.KeyMsg:
 			switch {
 			case key.Matches(msg, w.keybinds.applyFilter):
-				w.basicFilter(w.tiFilter.Value())
+				w.filter(w.tiFilter.Value())
 
 				return nil
 
@@ -279,7 +284,7 @@ func (w *Widget[T]) Render() string {
 				b.WriteString("\n")
 			}
 
-			item := *li.item
+			item := w.listItems[li.Index]
 			b.WriteString(item.Render())
 		}
 	} else {
@@ -476,6 +481,8 @@ func (w *Widget[T]) nextFilteredItem() {
 }
 
 func (w *Widget[T]) moveCursor(index int) {
+	var cursor int
+
 	// based on the global index set the cursor and the current page.
 	if index < 0 {
 		return
@@ -484,7 +491,17 @@ func (w *Widget[T]) moveCursor(index int) {
 	itemsOnPage := w.paginator.PerPage
 
 	page := int(math.Floor(float64(index) / float64(itemsOnPage)))
-	cursor := index % itemsOnPage
+
+	if w.FilterState() == FilterApplied {
+		for i, fi := range w.filteredListItems {
+			if fi.Index == index {
+				cursor = i
+				break
+			}
+		}
+	} else {
+		cursor = index % itemsOnPage
+	}
 
 	w.paginator.Page = page
 	w.cursor = cursor
@@ -573,7 +590,7 @@ func (w *Widget[T]) SetItem(index int, data T) {
 	w.listItems[index].UpdateData(data)
 
 	if w.filterState == FilterApplied {
-		w.basicFilter(w.tiFilter.Value())
+		w.filter(w.tiFilter.Value())
 	}
 }
 
@@ -588,7 +605,7 @@ func (w *Widget[T]) AppendItem(data T) {
 	w.focusManager.Add(widget)
 
 	if w.filterState == FilterApplied {
-		w.basicFilter(w.tiFilter.Value())
+		w.filter(w.tiFilter.Value())
 	}
 
 	w.paginatorUpdate()
@@ -618,7 +635,7 @@ func (w *Widget[T]) InsertItem(index int, data T) {
 	w.focusManager.Insert(index, widget)
 
 	if w.filterState == FilterApplied {
-		w.basicFilter(w.tiFilter.Value())
+		w.filter(w.tiFilter.Value())
 	}
 
 	w.paginatorUpdate()
@@ -668,7 +685,7 @@ func (w *Widget[T]) RemoveItem(index int) {
 	w.removeItem(index)
 
 	if w.filterState == FilterApplied {
-		w.basicFilter(w.tiFilter.Value())
+		w.filter(w.tiFilter.Value())
 	}
 
 	w.paginatorUpdate()
@@ -696,7 +713,7 @@ func (w *Widget[T]) FocusFirst() {
 
 	if w.filterState == FilterApplied {
 		if len(w.filteredListItems) > 0 {
-			w.globalIndex = w.filteredListItems[0].index
+			w.globalIndex = w.filteredListItems[0].Index
 			w.cursor = 0
 		} else {
 			w.cursor = -1
@@ -719,27 +736,14 @@ func (w *Widget[T]) FilterState() FilterState {
 	return w.filterState
 }
 
-func (w *Widget[T]) basicFilter(s string) {
+func (w *Widget[T]) filter(s string) {
 	if s == "" {
 		w.clearFilter()
 	}
 
 	w.tiFilter.OnBlur()
 
-	w.filteredListItems = make(filteredItems[T], 0)
-
-	for i, v := range w.listItems {
-		if strings.Contains(strings.ToLower(v.FilterValue()), strings.ToLower(s)) {
-			w.filteredListItems = append(w.filteredListItems, filteredItem[T]{
-				index: i,
-				item:  &w.listItems[i],
-			})
-			v.SetActive(true)
-			continue
-		}
-
-		v.SetActive(false)
-	}
+	w.filteredListItems = w.Filter(&w.listItems, s)
 
 	w.filterState = FilterApplied
 
@@ -748,6 +752,40 @@ func (w *Widget[T]) basicFilter(s string) {
 	w.FocusFirst()
 }
 
+func BasicFilter[T any](items *[]ListItem[T], s string) FilteredItems {
+	var filteredItems FilteredItems
+
+	for i, v := range *items {
+		if strings.Contains(strings.ToLower(v.FilterValue()), strings.ToLower(s)) {
+			filteredItems = append(filteredItems, FilteredItem{
+				Index: i,
+			})
+		}
+	}
+
+	return filteredItems
+}
+
+func FuzzyFilter[T any](items *[]ListItem[T], s string) FilteredItems {
+	var data []string
+	var filteredItems FilteredItems
+
+	for _, v := range *items {
+		data = append(data, v.FilterValue())
+	}
+
+	matches := fuzzy.Find(s, data)
+
+	for _, m := range matches {
+		filteredItems = append(filteredItems, FilteredItem{
+			Index: m.Index,
+		})
+	}
+
+	return filteredItems
+}
+
+// Length returns the count of items in the list.
 func (w *Widget[T]) Length() int {
 	return len(w.listItems)
 }
@@ -756,7 +794,7 @@ func (w *Widget[T]) clearFilter() {
 	w.tiFilter.SetValue("")
 	w.tiFilter.OnBlur()
 
-	w.filteredListItems = make(filteredItems[T], 0)
+	w.filteredListItems = make(FilteredItems, 0)
 
 	for _, v := range w.listItems {
 		v.SetActive(true)
@@ -777,7 +815,7 @@ func (w *Widget[T]) enterFilter() {
 
 func (w *Widget[T]) getFilteredGlobalIndex() int {
 	index := (w.paginator.Page * w.paginator.PerPage) + w.cursor
-	return w.filteredListItems[index].index
+	return w.filteredListItems[index].Index
 }
 
 func (w *Widget[T]) callCursorMovingCallback(index int) {

@@ -24,6 +24,19 @@ func New() *Screen {
 
 	s.stringList = list.New(list.SimpleListItemConstructor)
 	s.stringList.AutoFocusNewItem = false
+	// s.stringList.Filter = func(items *[]list.ListItem[string], s string) list.FilteredItems {
+	// 	var filteredItems list.FilteredItems
+	//
+	// 	for i, item := range *items {
+	// 		if !strings.Contains(strings.ToLower(item.FilterValue()), strings.ToLower(s)) {
+	// 			filteredItems = append(filteredItems, list.FilteredItem{
+	// 				Index: i,
+	// 			})
+	// 		}
+	// 	}
+	//
+	// 	return filteredItems
+	// }
 
 	s.elementIndex = 0
 
@@ -33,7 +46,17 @@ func New() *Screen {
 }
 
 func (s *Screen) OnEnter(a any) tea.Cmd {
-	s.stringValues = make([]string, 0)
+	s.stringValues = []string{
+		"Pêche au poisson",
+		"Couper du bois",
+		"Cueillir des champignons vénéneux dans les bois",
+		"Courir tout nu dans le pré",
+		"Se fritter avec des monstres gigantesque",
+		"S'habiller avec des habits grotesque",
+		"Farmer le blé dans le pré",
+		"Dancer tout nu avec un epis de blé coincé entre les parties charnues",
+		"S'en aller faire des courses",
+	}
 
 	s.elementIndex = 0
 
