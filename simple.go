@@ -34,6 +34,7 @@ func NewSimpleRenderable(value string) *SimpleRenderable {
 	return s
 }
 
+// SetValue changes the current value with the given one.
 func (s *SimpleRenderable) SetValue(value string) {
 	s.value = value
 }

@@ -9,6 +9,8 @@ type Activable interface {
 	IsActive() bool
 }
 
+// BaseActivable interface represents the basic implementation of an Activable.
+// To avoid code repetition.
 type BaseActivable struct {
 	active bool
 }
@@ -21,6 +23,7 @@ func (b *BaseActivable) IsActive() bool {
 	return b.active
 }
 
+// NewBaseActivable creates a new BaseActivable.
 func NewBaseActivable() BaseActivable {
 	a := BaseActivable{}
 

@@ -1,9 +1,5 @@
 package orvyn
 
-import (
-	tea "github.com/charmbracelet/bubbletea"
-)
-
 // Renderable interface defines any orvyn element that can be rendered.
 type Renderable interface {
 	// Activable compose the Renderable with the Activable interface
@@ -12,7 +8,7 @@ type Renderable interface {
 	// Render is the way the renderable should be rendered.
 	Render() string
 
-	// Resize will be called when the renderable is resized by the layout.
+	// Resize will be called when the renderable is resized by a layout.
 	Resize(Size)
 
 	// GetSize returns the current size of the Renderable.
@@ -40,7 +36,7 @@ type BaseRenderable struct {
 	preferredSize Size
 }
 
-// NewBaseRenderable facilitates the creation of a new BaseRenderable and returns it.
+// NewBaseRenderable creates and returns a new BaseRenderable.
 func NewBaseRenderable() BaseRenderable {
 	b := BaseRenderable{}
 
@@ -74,8 +70,4 @@ func (b *BaseRenderable) SetPreferredSize(size Size) {
 
 func (b *BaseRenderable) GetPreferredSize() Size {
 	return b.preferredSize
-}
-
-type Updatable interface {
-	Update(tea.Msg) tea.Cmd
 }

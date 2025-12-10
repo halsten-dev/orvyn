@@ -28,11 +28,12 @@ var (
 	// previousScreenID holds the previously active ScreenID.
 	previousScreenID ScreenID
 
-	activeDialog *Dialog
+	activeDialog *dialog
 
 	activeTheme theme.Theme
 )
 
+// Init function is used to initialize orvyn and make it useable.
 func Init() {
 	ExitKeybind = key.NewBinding(key.WithKeys("ctrl+c"))
 	ProcessExit = true
@@ -172,11 +173,11 @@ func GetCurrentScreenID() ScreenID {
 
 // Dialog API
 
-func OpenDialog(dialogID ScreenID, dialog Screen, param any) {
-	activeDialog = new(Dialog)
+func OpenDialog(dialogID ScreenID, dialogScreen Screen, param any) {
+	activeDialog = new(dialog)
 
 	activeDialog.dialogID = dialogID
-	activeDialog.screen = dialog
+	activeDialog.screen = dialogScreen
 
 	activeDialog.screen.OnEnter(param)
 }
@@ -187,5 +188,5 @@ func CloseDialog() tea.Cmd {
 
 	activeDialog = nil
 
-	return DialogExitCmd(id, param)
+	return dialogExitCmd(id, param)
 }

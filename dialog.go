@@ -1,6 +1,6 @@
 package orvyn
 
-type Dialog struct {
+type dialog struct {
 	dialogID ScreenID
 	screen   Screen
 }

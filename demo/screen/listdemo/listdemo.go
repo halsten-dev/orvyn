@@ -7,11 +7,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/layout"
-	"github.com/halsten-dev/orvyn/widget/list"
+	"github.com/halsten-dev/orvyn/widget/widgetlist"
 )
 
 type Screen struct {
-	stringList   *list.Widget[string]
+	stringList   *widgetlist.Widget[string]
 	stringValues []string
 
 	elementIndex int
@@ -22,14 +22,14 @@ type Screen struct {
 func New() *Screen {
 	s := new(Screen)
 
-	s.stringList = list.New(list.SimpleListItemConstructor)
+	s.stringList = widgetlist.New(widgetlist.SimpleListItemConstructor)
 	s.stringList.AutoFocusNewItem = false
-	// s.stringList.Filter = func(items *[]list.ListItem[string], s string) list.FilteredItems {
-	// 	var filteredItems list.FilteredItems
+	// s.stringList.Filter = func(items *[]widgetlist.ListItem[string], s string) widgetlist.FilteredItems {
+	// 	var filteredItems widgetlist.FilteredItems
 	//
 	// 	for i, item := range *items {
 	// 		if !strings.Contains(strings.ToLower(item.FilterValue()), strings.ToLower(s)) {
-	// 			filteredItems = append(filteredItems, list.FilteredItem{
+	// 			filteredItems = append(filteredItems, widgetlist.FilteredItem{
 	// 				Index: i,
 	// 			})
 	// 		}
@@ -73,13 +73,13 @@ func (s *Screen) Update(msg tea.Msg) tea.Cmd {
 	if m, ok := orvyn.GetKeyMsg(msg); ok {
 		switch {
 		case key.Matches(m, key.NewBinding(key.WithKeys("n"))):
-			if s.stringList.FilterState() != list.Filtering {
+			if s.stringList.FilterState() != widgetlist.Filtering {
 				s.stringList.AppendItem(fmt.Sprintf("Test %d", s.elementIndex))
 				s.elementIndex++
 			}
 
 		case key.Matches(m, key.NewBinding(key.WithKeys("i"))):
-			if s.stringList.FilterState() != list.Filtering {
+			if s.stringList.FilterState() != widgetlist.Filtering {
 				s.stringList.InsertItem(s.stringList.GetGlobalIndex(), fmt.Sprintf("Test Insert %d", s.elementIndex))
 				s.elementIndex++
 			}

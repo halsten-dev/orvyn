@@ -8,7 +8,7 @@ import (
 )
 
 // FocusManager can be instantiated when needed on a Screen to manage focus
-// on multiple widgets. Manage focus and input mode.
+// on multiple widgets. Manages focus and input mode of registred widgets.
 type FocusManager struct {
 	// NextFocusKeybind holds the key.Binding to loop through the Focusable Widgets.
 	// Tab by default.
@@ -18,14 +18,16 @@ type FocusManager struct {
 	// Shift+Tab by default.
 	PreviousFocusKeybind key.Binding
 
+	// ManageFocusNextPrevKeybind grants the focusManager to react to the NextFocusKeybind and PreviousFocusKeybind.
+	// True by default.
+	ManageFocusNextPrevKeybind bool
+
 	widgets     []Focusable
 	tabIndex    int
 	isInputting bool
-
-	ManageFocusNextPrevKeybind bool
 }
 
-// NewFocusManager creates and return a new *FocusManager
+// NewFocusManager creates and return a new *FocusManager.
 func NewFocusManager() *FocusManager {
 	f := new(FocusManager)
 
@@ -47,7 +49,7 @@ func NewFocusManager() *FocusManager {
 	return f
 }
 
-// Add append the given Focusable Widget to the manager.
+// Add appends the given Focusable Widget to the manager.
 // Order of append defines the focus order.
 func (f *FocusManager) Add(widget Focusable) {
 	if slices.Contains(f.widgets, widget) {
@@ -57,7 +59,7 @@ func (f *FocusManager) Add(widget Focusable) {
 	f.widgets = append(f.widgets, widget)
 }
 
-// Insert add a Focusable Widget at the given index.
+// Insert adds a Focusable Widget at the given index. Change the focus order.
 func (f *FocusManager) Insert(index int, widget Focusable) {
 	if index < 0 || index >= len(f.widgets) {
 		return
@@ -75,7 +77,7 @@ func (f *FocusManager) Insert(index int, widget Focusable) {
 	}
 }
 
-// Update allows to change the widget at the given index.
+// Update allows to change the widget at the given index, whitout changing the focus order.
 func (f *FocusManager) UpdateWidget(index int, widget Focusable) {
 	if index < 0 || index >= len(f.widgets) {
 		return
@@ -85,6 +87,7 @@ func (f *FocusManager) UpdateWidget(index int, widget Focusable) {
 }
 
 // Remove the widget from the manager at the given index.
+// Automatically focus the previous widget, if the given index is the currently focused widget.
 func (f *FocusManager) Remove(index int) {
 	if index < 0 || index >= len(f.widgets) {
 		return
@@ -109,7 +112,7 @@ func (f *FocusManager) RemoveWidget(widget Focusable) {
 }
 
 // SetWidgets replaces the manager widget list with the one given.
-// Widget order defines the focus order.
+// Given list order defines the focus order.
 func (f *FocusManager) SetWidgets(widgets []Focusable) {
 	f.widgets = widgets
 }
@@ -129,6 +132,7 @@ func (f *FocusManager) Focus(index int) {
 	f.focus(f.tabIndex)
 }
 
+// FocusFirst gives the focus to the first active widget.
 func (f *FocusManager) FocusFirst() {
 	f.BlurCurrent()
 
@@ -141,27 +145,28 @@ func (f *FocusManager) FocusFirst() {
 	}
 }
 
-// BlurCurrent simply blur the currently focused widget
+// BlurCurrent simply blur the currently focused widget.
 func (f *FocusManager) BlurCurrent() {
 	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.blur(f.tabIndex)
 	}
 }
 
-// ForceInput forces the widget to enter input
+// ForceInput forces the widget to enter input mode.
 func (f *FocusManager) ForceInput(index int) {
 	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.enterInput(f.tabIndex)
 	}
 }
 
-// ExitCurrentInput simply exits the currently inputting widget
+// ExitCurrentInput simply exits the currently inputting widget.
 func (f *FocusManager) ExitCurrentInput() {
 	if f.tabIndex >= 0 && f.tabIndex < len(f.widgets) {
 		f.exitInput(f.tabIndex)
 	}
 }
 
+// TabIndex returns the current tab index of the manager.
 func (f *FocusManager) TabIndex() int {
 	return f.tabIndex
 }
@@ -171,6 +176,7 @@ func (f *FocusManager) IsInputting() bool {
 	return f.isInputting
 }
 
+// PrevFocus moves the focus to the previous widget.
 func (f *FocusManager) PrevFocus() {
 	if f.widgets[f.tabIndex].IsFocused() {
 		f.blur(f.tabIndex)
@@ -181,6 +187,7 @@ func (f *FocusManager) PrevFocus() {
 	f.focus(f.tabIndex)
 }
 
+// NextFocus moves the focus to the next widget.
 func (f *FocusManager) NextFocus() {
 	if f.widgets[f.tabIndex].IsFocused() {
 		f.blur(f.tabIndex)
@@ -192,6 +199,30 @@ func (f *FocusManager) NextFocus() {
 
 }
 
+// Update needs to be called in the screen or widget update function.
+//
+//	func (s *Screen) Update(msg tea.Msg) tea.Cmd {
+//		switch msg := msg.(type) {
+//		case tea.KeyMsg:
+//			switch {
+//			case key.Matches(msg, keybind.Esc):
+//				return orvyn.SwitchToPreviousScreen()
+//
+//			case key.Matches(msg, keybind.Enter):
+//				ok := s.submit()
+//
+//				if ok {
+//					return orvyn.SwitchToPreviousScreen()
+//				}
+//
+//				return nil
+//			}
+//		}
+//
+//		cmd := s.focusManager.Update(msg)
+//
+//		return cmd
+//	}
 func (f *FocusManager) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 

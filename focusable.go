@@ -6,6 +6,7 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
+// Focusable interface represents the capacity to get and loose the focus.
 type Focusable interface {
 	// Updatable to be able to update a focusable widget.
 	Updatable
@@ -13,10 +14,10 @@ type Focusable interface {
 	// Activable to be able to activate or deactivate widget.
 	Activable
 
-	// OnFocus is called when the widget gains the focus.
+	// OnFocus is called to make the widget react to the focus gain.
 	OnFocus()
 
-	// OnBlur is called when the widget is loosing focus.
+	// OnBlur is called to make the widget react to the loss of focus.
 	OnBlur()
 
 	// OnEnterInput is called when the widget enters the input mode.
@@ -43,7 +44,7 @@ type Focusable interface {
 	// Input mode means that all the tea.Msg will be managed by the widget.
 	GetEnterInputKeybind() *key.Binding
 
-	// GetExitInputKeybind returns by default "Esc". Can be override.
+	// GetExitInputKeybind returns by default "Esc". Can be overridden.
 	GetExitInputKeybind() key.Binding
 
 	// CanExitInputting returns true if the widget can exit his inputting state.

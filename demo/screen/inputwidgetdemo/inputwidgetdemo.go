@@ -53,6 +53,8 @@ func (s *Screen) OnExit() any {
 }
 
 func (s *Screen) Update(msg tea.Msg) tea.Cmd {
+	cmd := orvyn.TickCmd()
+
 	cmd := s.focusManager.Update(msg)
 
 	return cmd

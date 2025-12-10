@@ -9,14 +9,14 @@ type Layout interface {
 	GetElements() []Renderable
 }
 
-// BaseLayout type is used to simplify the creation of custom layout.
+// BaseLayout type is used to simplify the creation of custom layouts.
 type BaseLayout struct {
 	BaseRenderable
 
 	elements []Renderable
 }
 
-// NewBaseLayout creates a new BaseLayout and returns it.
+// NewBaseLayout creates and returns a new BaseLayout.
 func NewBaseLayout(elements ...Renderable) BaseLayout {
 	b := BaseLayout{}
 

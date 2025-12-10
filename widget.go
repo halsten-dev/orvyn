@@ -6,6 +6,7 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
+// Widget interface defines behaviour of a widget.
 type Widget interface {
 	// Init is called on the Widget when entering a Screen that contains it.
 	Init() tea.Cmd
@@ -20,19 +21,21 @@ type Widget interface {
 	// Borders of the style have been taken into account.
 	GetContentSize() Size
 
-	// Updatable Widget can be updated.
+	// Updatable so Widget can be updated.
 	Updatable
 
-	// Renderable Widget can be rendered.
+	// Renderable so Widget can be rendered.
 	Renderable
 }
 
+// BaseWidget helps building custom widgets.
 type BaseWidget struct {
 	BaseRenderable
 	style       lipgloss.Style
 	contentSize Size
 }
 
+// NewBaseWidget creates and returns a new BaseWidget.
 func NewBaseWidget() BaseWidget {
 	w := BaseWidget{}
 
