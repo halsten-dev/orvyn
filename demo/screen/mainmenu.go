@@ -33,7 +33,7 @@ func NewMainMenu() *MainMenu {
 			Action: m.inputDemo,
 		},
 		{
-			Label:  "List demo",
+			Label:  "WidgetList demo",
 			Action: m.listDemo,
 		},
 		{
