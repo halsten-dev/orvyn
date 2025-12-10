@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	WelcomeScreenID         orvyn.ScreenID = "welcomeScreen"
+	MainMenuScreenID        orvyn.ScreenID = "mainMenuScreen"
 	ListDemoScreenID        orvyn.ScreenID = "listDemoScreen"
 	InputWidgetDemoScreenID orvyn.ScreenID = "inputWidgetDemoScreen"
 )
