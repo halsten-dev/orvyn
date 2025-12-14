@@ -480,28 +480,30 @@ func (w *Widget[T]) nextFilteredItem() {
 	w.globalIndex = w.getFilteredGlobalIndex()
 }
 
-func (w *Widget[T]) moveCursor(index int) {
+func (w *Widget[T]) moveCursor(globalIndex int) {
 	var cursor int
 
 	// based on the global index set the cursor and the current page.
-	if index < 0 {
+	if globalIndex < 0 {
 		return
 	}
 
 	itemsOnPage := w.paginator.PerPage
-
-	page := int(math.Floor(float64(index) / float64(itemsOnPage)))
+	index := globalIndex
 
 	if w.FilterState() == FilterApplied {
 		for i, fi := range w.filteredListItems {
-			if fi.Index == index {
+			if fi.Index == globalIndex {
 				cursor = i
+				index = i
 				break
 			}
 		}
 	} else {
-		cursor = index % itemsOnPage
+		cursor = globalIndex % itemsOnPage
 	}
+
+	page := int(math.Floor(float64(index) / float64(itemsOnPage)))
 
 	w.paginator.Page = page
 	w.cursor = cursor
