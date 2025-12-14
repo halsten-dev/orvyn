@@ -398,27 +398,27 @@ func (w *Widget[T]) previousFilteredItem() {
 			w.paginator.Page = w.paginator.TotalPages - 1
 			w.cursor = w.paginator.ItemsOnPage(len(w.filteredListItems)) - 1
 			w.globalIndex = w.getFilteredGlobalIndex()
+			w.callCursorMovedCallback(w.globalIndex)
 			return
 		}
 
 		w.cursor = 0
 		w.globalIndex = w.getFilteredGlobalIndex()
+		w.callCursorMovedCallback(w.globalIndex)
 		return
 	}
 
 	w.globalIndex = w.getFilteredGlobalIndex()
 
 	if w.cursor >= 0 {
+		w.callCursorMovedCallback(w.globalIndex)
 		return
 	}
 
 	w.paginator.PrevPage()
 	w.cursor = w.paginator.ItemsOnPage(len(w.filteredListItems)) - 1
 	w.globalIndex = w.getFilteredGlobalIndex()
-
-	if w.CursorMovedCallback != nil {
-		w.CursorMovedCallback(w.globalIndex)
-	}
+	w.callCursorMovedCallback(w.globalIndex)
 }
 
 // NextItem manages the focus of the next item.
@@ -465,27 +465,27 @@ func (w *Widget[T]) nextFilteredItem() {
 			w.paginator.Page = 0
 			w.cursor = 0
 			w.globalIndex = w.getFilteredGlobalIndex()
+			w.callCursorMovedCallback(w.globalIndex)
 			return
 		}
 
 		w.cursor = itemsOnPage - 1
 		w.globalIndex = w.getFilteredGlobalIndex()
+		w.callCursorMovedCallback(w.globalIndex)
 		return
 	}
 
 	w.globalIndex = w.getFilteredGlobalIndex()
 
 	if w.cursor <= itemsOnPage-1 {
+		w.callCursorMovedCallback(w.globalIndex)
 		return
 	}
 
 	w.paginator.NextPage()
 	w.cursor = 0
 	w.globalIndex = w.getFilteredGlobalIndex()
-
-	if w.CursorMovedCallback != nil {
-		w.CursorMovedCallback(w.globalIndex)
-	}
+	w.callCursorMovedCallback(w.globalIndex)
 }
 
 func (w *Widget[T]) moveCursor(globalIndex int) {
@@ -516,9 +516,7 @@ func (w *Widget[T]) moveCursor(globalIndex int) {
 	w.paginator.Page = page
 	w.cursor = cursor
 
-	if w.CursorMovedCallback != nil {
-		w.CursorMovedCallback(w.globalIndex)
-	}
+	w.callCursorMovedCallback(w.globalIndex)
 }
 
 func (w *Widget[T]) SetFilterable(filterable bool) {
@@ -839,5 +837,15 @@ func (w *Widget[T]) callCursorMovingCallback(index int) {
 
 	if w.CursorMovingCallback != nil {
 		w.CursorMovingCallback(index)
+	}
+}
+
+func (w *Widget[T]) callCursorMovedCallback(index int) {
+	if index < 0 || index >= len(w.listItems) {
+		return
+	}
+
+	if w.CursorMovedCallback != nil {
+		w.CursorMovedCallback(index)
 	}
 }
