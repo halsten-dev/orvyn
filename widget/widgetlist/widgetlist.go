@@ -415,6 +415,10 @@ func (w *Widget[T]) previousFilteredItem() {
 	w.paginator.PrevPage()
 	w.cursor = w.paginator.ItemsOnPage(len(w.filteredListItems)) - 1
 	w.globalIndex = w.getFilteredGlobalIndex()
+
+	if w.CursorMovedCallback != nil {
+		w.CursorMovedCallback(w.globalIndex)
+	}
 }
 
 // NextItem manages the focus of the next item.
@@ -478,6 +482,10 @@ func (w *Widget[T]) nextFilteredItem() {
 	w.paginator.NextPage()
 	w.cursor = 0
 	w.globalIndex = w.getFilteredGlobalIndex()
+
+	if w.CursorMovedCallback != nil {
+		w.CursorMovedCallback(w.globalIndex)
+	}
 }
 
 func (w *Widget[T]) moveCursor(globalIndex int) {
