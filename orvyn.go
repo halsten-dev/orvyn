@@ -173,13 +173,13 @@ func GetCurrentScreenID() ScreenID {
 
 // Dialog API
 
-func OpenDialog(dialogID ScreenID, dialogScreen Screen, param any) {
+func OpenDialog(dialogID ScreenID, dialogScreen Screen, param any) tea.Cmd {
 	activeDialog = new(dialog)
 
 	activeDialog.dialogID = dialogID
 	activeDialog.screen = dialogScreen
 
-	activeDialog.screen.OnEnter(param)
+	return activeDialog.screen.OnEnter(param)
 }
 
 func CloseDialog() tea.Cmd {
