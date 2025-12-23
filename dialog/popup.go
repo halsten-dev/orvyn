@@ -23,7 +23,7 @@ type Config struct {
 	Options []Option
 }
 
-type PopupDialog struct {
+type Popup struct {
 	config Config
 
 	content *orvyn.SimpleRenderable
@@ -36,10 +36,10 @@ type PopupDialog struct {
 
 // New returns a new screen based on the given Config.
 // This screen will need to be used with orvyn.OpenDialog().
-func NewPopup(config Config) *PopupDialog {
+func NewPopup(config Config) *Popup {
 	var b strings.Builder
 
-	s := new(PopupDialog)
+	s := new(Popup)
 
 	t := orvyn.GetTheme()
 	ns := t.Style(theme.NormalTextStyleID)
@@ -62,9 +62,9 @@ func NewPopup(config Config) *PopupDialog {
 			b.WriteString(nds.Render(fmt.Sprintf(" %c ", '•')))
 		}
 
-		b.WriteString(fmt.Sprintf("%s %s",
+		fmt.Fprintf(&b, "%s %s",
 			ns.Render(o.Keybind.Help().Key),
-			ds.Render(o.Text)))
+			ds.Render(o.Text))
 	}
 
 	s.options = orvyn.NewSimpleRenderable(b.String())
@@ -79,15 +79,15 @@ func NewPopup(config Config) *PopupDialog {
 	return s
 }
 
-func (s *PopupDialog) OnEnter(i any) tea.Cmd {
+func (s *Popup) OnEnter(i any) tea.Cmd {
 	return nil
 }
 
-func (s *PopupDialog) OnExit() any {
+func (s *Popup) OnExit() any {
 	return s.value
 }
 
-func (s *PopupDialog) Update(msg tea.Msg) tea.Cmd {
+func (s *Popup) Update(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		for _, o := range s.config.Options {
@@ -101,6 +101,6 @@ func (s *PopupDialog) Update(msg tea.Msg) tea.Cmd {
 	return nil
 }
 
-func (s *PopupDialog) Render() orvyn.Layout {
+func (s *Popup) Render() orvyn.Layout {
 	return s.layout
 }

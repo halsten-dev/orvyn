@@ -15,6 +15,7 @@ func main() {
 	orvyn.RegisterScreen(screen.MainMenuScreenID, screen.NewMainMenu())
 	orvyn.RegisterScreen(screen.ListDemoScreenID, screen.NewListDemo())
 	orvyn.RegisterScreen(screen.InputWidgetDemoScreenID, screen.NewInputWidgetDemo())
+	orvyn.RegisterScreen(screen.ProgressDemoScreenID, screen.NewProgressDemo())
 
 	p := tea.NewProgram(&App{}, tea.WithAltScreen())
 

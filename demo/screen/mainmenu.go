@@ -37,6 +37,10 @@ func NewMainMenu() *MainMenu {
 			Action: m.listDemo,
 		},
 		{
+			Label:  "Progress demo",
+			Action: m.progressDemo,
+		},
+		{
 			Label:  "Quit",
 			Action: m.quit,
 		},
@@ -66,6 +70,10 @@ func (m *MainMenu) inputDemo() tea.Cmd {
 
 func (m *MainMenu) listDemo() tea.Cmd {
 	return orvyn.SwitchScreen(ListDemoScreenID)
+}
+
+func (m *MainMenu) progressDemo() tea.Cmd {
+	return orvyn.SwitchScreen(ProgressDemoScreenID)
 }
 
 func (m *MainMenu) quit() tea.Cmd {
