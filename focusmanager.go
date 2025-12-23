@@ -233,17 +233,19 @@ func (f *FocusManager) Update(msg tea.Msg) tea.Cmd {
 	}
 
 	if f.widgets[f.tabIndex].IsInputting() {
+		var exitCmd tea.Cmd
+
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			if key.Matches(msg, f.widgets[f.tabIndex].GetExitInputKeybind()) {
 				if f.widgets[f.tabIndex].CanExitInputting() {
-					f.exitInput(f.tabIndex)
+					exitCmd = f.exitInput(f.tabIndex)
 				}
 			}
 		}
 
 		cmd = f.widgets[f.tabIndex].Update(msg)
-		return cmd
+		return tea.Batch(cmd, exitCmd)
 	}
 
 	switch msg := msg.(type) {
@@ -266,9 +268,9 @@ func (f *FocusManager) Update(msg tea.Msg) tea.Cmd {
 
 		if inputtingKeybind != nil {
 			if key.Matches(msg, *inputtingKeybind) {
-				f.enterInput(f.tabIndex)
+				cmd := f.enterInput(f.tabIndex)
 
-				return nil
+				return cmd
 			}
 		}
 
@@ -317,17 +319,21 @@ func (f *FocusManager) blur(index int) {
 }
 
 // enterInput is a shorthand to manage the inputting state and call OnEnterInput.
-func (f *FocusManager) enterInput(index int) {
+func (f *FocusManager) enterInput(index int) tea.Cmd {
 	f.widgets[index].setInputting(true)
-	f.widgets[index].OnEnterInput()
+	cmd := f.widgets[index].OnEnterInput()
 	f.isInputting = true
+
+	return cmd
 }
 
 // exitInput is a shorthand to manage the inputting state and call OnExitInput.
-func (f *FocusManager) exitInput(index int) {
+func (f *FocusManager) exitInput(index int) tea.Cmd {
 	f.widgets[index].setInputting(false)
-	f.widgets[index].OnExitInput()
+	cmd := f.widgets[index].OnExitInput()
 	f.isInputting = false
+
+	return cmd
 }
 
 func (f *FocusManager) getNextIndex() int {

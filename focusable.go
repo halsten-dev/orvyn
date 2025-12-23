@@ -2,6 +2,7 @@ package orvyn
 
 import (
 	"github.com/charmbracelet/bubbles/key"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn/theme"
 )
@@ -22,10 +23,12 @@ type Focusable interface {
 
 	// OnEnterInput is called when the widget enters the input mode.
 	// Input mode means that all the tea.Msg will be managed by the widget.
-	OnEnterInput()
+	// Returns a tea.Cmd.
+	OnEnterInput() tea.Cmd
 
 	// OnExitInput is called when the widget exits the input mode.
-	OnExitInput()
+	// Returns a tea.Cmd.
+	OnExitInput() tea.Cmd
 
 	// IsFocused return true if the widget is currently focused.
 	// A widget can be focused without being in input mode.
@@ -101,9 +104,13 @@ func (b *BaseFocusable) IsInputting() bool {
 	return b.inputting
 }
 
-func (b *BaseFocusable) OnEnterInput() {}
+func (b *BaseFocusable) OnEnterInput() tea.Cmd {
+	return nil
+}
 
-func (b *BaseFocusable) OnExitInput() {}
+func (b *BaseFocusable) OnExitInput() tea.Cmd {
+	return nil
+}
 
 func (b *BaseFocusable) GetFocusKeybind() *key.Binding {
 	return nil

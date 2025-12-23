@@ -45,10 +45,6 @@ func (s *SimpleListItem) Render() string {
 		Render(s.value)
 }
 
-func (s *SimpleListItem) OnEnterInput() {}
-
-func (s *SimpleListItem) OnExitInput() {}
-
 func (s *SimpleListItem) FilterValue() string {
 	return s.value
 }

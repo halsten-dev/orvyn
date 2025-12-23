@@ -42,14 +42,6 @@ func (a *ActionListItem) GetData() ActionListItemData {
 	return a.data
 }
 
-// OnEnterInput implements list.ListItem.
-func (a *ActionListItem) OnEnterInput() {
-}
-
-// OnExitInput implements list.ListItem.
-func (a *ActionListItem) OnExitInput() {
-}
-
 func (a *ActionListItem) Resize(size orvyn.Size) {
 	size.Height = 3
 

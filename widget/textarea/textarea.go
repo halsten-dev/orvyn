@@ -84,10 +84,6 @@ func (w *Widget) Resize(size orvyn.Size) {
 	}
 }
 
-func (w *Widget) OnEnterInput() {}
-
-func (w *Widget) OnExitInput() {}
-
 func (w *Widget) updateStyle() {
 	t := orvyn.GetTheme()
 
