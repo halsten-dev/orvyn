@@ -17,6 +17,8 @@ const (
 	NeutralMessage
 )
 
+// Widget is a status message that can hold different type of message.
+// Each message type have it's own style based on theme Status TextStyleID.
 type Widget struct {
 	orvyn.BaseWidget
 
@@ -25,6 +27,7 @@ type Widget struct {
 	messageStyle lipgloss.Style
 }
 
+// New creates and returns a new status message *Widget.
 func New() *Widget {
 	w := new(Widget)
 
@@ -33,6 +36,7 @@ func New() *Widget {
 	return w
 }
 
+// Init helps initializing the widget.
 func (w *Widget) Init() tea.Cmd {
 	w.Reset()
 
@@ -65,18 +69,21 @@ func (w *Widget) GetPreferredSize() orvyn.Size {
 	return w.GetMinSize()
 }
 
+// SetMessage helps defining the message and the type of the message of the widget.
 func (w *Widget) SetMessage(msg string, msgType messageType) {
 	w.message = msg
 	w.messageType = msgType
 	w.updateStyle()
 }
 
+// SetError helps defining an error message directly from an error.
 func (w *Widget) SetError(err error) {
 	w.message = err.Error()
 	w.messageType = ErrorMessage
 	w.updateStyle()
 }
 
+// Reset helps resetting the widget to it's default state.
 func (w *Widget) Reset() {
 	w.message = ""
 	w.messageType = NeutralMessage

@@ -11,16 +11,21 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
+// Widget is a progressbar that should be used as a progress indicator.
 type Widget struct {
 	orvyn.BaseWidget
 
 	progress.Model
 
+	// TitleStyle holds the style of the title. Theme TitleStyleID by default.
 	TitleStyle lipgloss.Style
 
 	title string
 
-	MaxValue     int
+	// MaxValue is used to define the progress in the title.
+	MaxValue int
+
+	// CurrentValue is used to define the progress in the title.
 	CurrentValue int
 
 	showTitle                  bool
@@ -28,6 +33,7 @@ type Widget struct {
 	showPercentage             bool
 }
 
+// New creates and return a new progress bar *Widget.
 func New(title string) *Widget {
 	w := new(Widget)
 
@@ -93,27 +99,47 @@ func (w *Widget) Resize(size orvyn.Size) {
 
 func (w *Widget) GetMinSize() orvyn.Size {
 	titleHeight := orvyn.GetRenderSize(w.TitleStyle, w.title).Height
+
+	if !w.showTitle {
+		titleHeight = 0
+	}
+
 	return orvyn.NewSize(10, titleHeight+1)
 }
 
 func (w *Widget) GetPreferredSize() orvyn.Size {
 	titleHeight := orvyn.GetRenderSize(w.TitleStyle, w.title).Height
+
+	if !w.showTitle {
+		titleHeight = 0
+	}
+
 	return orvyn.NewSize(30, titleHeight+1)
 }
 
+// SetColor helps changing the bar color.
 func (w *Widget) SetColor(color lipgloss.Color) {
 	w.Model.FullColor = string(color)
 }
 
+// SetTitleVisibility changes the visibility of the title.
 func (w *Widget) SetTitleVisibility(b bool) {
 	w.showTitle = b
 }
 
+// SetTitleProgressVisibility changes the visiblity of the current progress directly in the title.
+// For example : (12/100)
 func (w *Widget) SetTitleProgressVisibility(b bool) {
 	w.showCurrentMaxValueInTitle = b
 }
 
+// SetPercentageVisibility changes the visibility of the percentage in the bar.
 func (w *Widget) SetPercentageVisibility(b bool) {
 	w.showPercentage = b
 	w.Model.ShowPercentage = b
+}
+
+// SetPercentageStyle allows to define the percentage style.
+func (w *Widget) SetPercentageStyle(style lipgloss.Style) {
+	w.Model.PercentageStyle = style
 }

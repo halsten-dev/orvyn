@@ -34,8 +34,8 @@ type Popup struct {
 	value uint
 }
 
-// New returns a new screen based on the given Config.
-// This screen will need to be used with orvyn.OpenDialog().
+// NewPopup returns a new screen based on the given Config.
+// This screen needs to be used with orvyn.OpenDialog().
 func NewPopup(config Config) *Popup {
 	var b strings.Builder
 

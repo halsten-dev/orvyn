@@ -8,6 +8,7 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
+// Widget is a checkbox widget holding 2 state : Checked and Unchecked.
 type Widget struct {
 	orvyn.BaseWidget
 	orvyn.BaseFocusable
@@ -19,6 +20,7 @@ type Widget struct {
 	CheckKeybind key.Binding
 }
 
+// New creates and returns a new checkbox *Widget.
 func New(label string) *Widget {
 	w := new(Widget)
 
@@ -73,10 +75,6 @@ func (w *Widget) Render() string {
 	return lipgloss.JoinHorizontal(lipgloss.Center, checkbox, label)
 }
 
-func (w *Widget) OnEnterInput() {}
-
-func (w *Widget) OnExitInput() {}
-
 func (w *Widget) GetMinSize() orvyn.Size {
 	return orvyn.NewSize(15, 3)
 }
@@ -85,14 +83,17 @@ func (w *Widget) GetPreferredSize() orvyn.Size {
 	return orvyn.NewSize(46, 3)
 }
 
+// IsChecked returns the current state of the checkbox.
 func (w *Widget) IsChecked() bool {
 	return w.checked
 }
 
+// SetChecked changes the current state of the checkbox.
 func (w *Widget) SetChecked(checked bool) {
 	w.checked = checked
 }
 
+// SetLabel changes the label associated to the checkbox.
 func (w *Widget) SetLabel(label string) {
 	w.label = label
 }

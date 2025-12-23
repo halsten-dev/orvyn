@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn"
 	"github.com/halsten-dev/orvyn/dialog"
 	"github.com/halsten-dev/orvyn/layout"
@@ -28,8 +29,8 @@ func NewProgressDemo() *ProgressDemo {
 
 	p.srStatus.SetActive(false)
 
-	keybind := key.NewBinding(key.WithKeys("esc"))
-	p.dial.CancelKeybind = &keybind
+	keybind := key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "cancel"))
+	p.dial.SetCancelKeybind(&keybind)
 
 	p.layout = layout.NewCenterLayout(
 		layout.NewMaxWidthVBoxLayout(0,
@@ -92,8 +93,22 @@ func (p *ProgressDemo) launchProgress() tea.Cmd {
 				return
 			}
 
+			percent := float64(100*count/maxSteps) / 100
+
 			count++
 			dial.UpdateProgress(count, maxSteps)
+
+			// Change bar color
+			switch {
+			case percent < 0.25:
+				dial.SetBarColor(lipgloss.Color("#1343A3"))
+			case percent > 0.25 && percent < 0.5:
+				dial.SetBarColor(lipgloss.Color("#732BDF"))
+			case percent > 0.5 && percent < 0.75:
+				dial.SetBarColor(lipgloss.Color("#FF5B8B"))
+			case percent > 0.75:
+				dial.SetBarColor(lipgloss.Color("#FF0000"))
+			}
 
 			time.Sleep(300 * time.Millisecond)
 		}

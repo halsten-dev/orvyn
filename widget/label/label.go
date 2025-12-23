@@ -5,12 +5,14 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
+// Widget is a simple Label that holds and render a value with the theme LabelTextStyleID.
 type Widget struct {
 	orvyn.BaseWidget
 
 	value string
 }
 
+// New creates and returns a new label *Widget.
 func New(value string) *Widget {
 	w := new(Widget)
 
@@ -21,6 +23,7 @@ func New(value string) *Widget {
 	return w
 }
 
+// SetValue is used to change the value of the label.
 func (w *Widget) SetValue(value string) {
 	w.value = value
 }
