@@ -330,10 +330,6 @@ func (w *Widget[T]) OnBlur() {
 	widget.UpdatePaginatorTheme(&w.paginator)
 }
 
-func (w *Widget[T]) OnEnterInput() {}
-
-func (w *Widget[T]) OnExitInput() {}
-
 func (w *Widget[T]) IsInputting() bool {
 	inputting := w.checkInputting()
 
