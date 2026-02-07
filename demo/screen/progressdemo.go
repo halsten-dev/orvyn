@@ -56,6 +56,9 @@ func (p *ProgressDemo) Update(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, key.NewBinding(key.WithKeys(" "))):
 			return p.launchProgress()
+
+		case key.Matches(msg, key.NewBinding(key.WithKeys("esc"))):
+			return orvyn.SwitchToPreviousScreen()
 		}
 	case orvyn.DialogExitMsg:
 		switch msg.DialogID {
