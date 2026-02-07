@@ -9,7 +9,7 @@ Orvyn comes with a powerful focus manager that helps bring to life your most com
 ready to use and customizable to your will.
 
 # State of the project
-Already in use in the Farental TUI client. Under development, not production ready yet.
+The v1.0 is released and is in a stable state.
 
 # Want to know more about Orvyn
 Try to catch me on stream : https://www.twitch.tv/halstendev
