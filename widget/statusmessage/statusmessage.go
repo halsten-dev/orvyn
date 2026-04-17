@@ -7,10 +7,10 @@ import (
 	"github.com/halsten-dev/orvyn/theme"
 )
 
-type messageType int
+type MessageType int
 
 const (
-	ErrorMessage messageType = iota
+	ErrorMessage MessageType = iota
 	SuccessMessage
 	WarningMessage
 	InformationMessage
@@ -23,7 +23,7 @@ type Widget struct {
 	orvyn.BaseWidget
 
 	message      string
-	messageType  messageType
+	messageType  MessageType
 	messageStyle lipgloss.Style
 }
 
@@ -70,7 +70,7 @@ func (w *Widget) GetPreferredSize() orvyn.Size {
 }
 
 // SetMessage helps defining the message and the type of the message of the widget.
-func (w *Widget) SetMessage(msg string, msgType messageType) {
+func (w *Widget) SetMessage(msg string, msgType MessageType) {
 	w.message = msg
 	w.messageType = msgType
 	w.updateStyle()
