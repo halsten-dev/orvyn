@@ -24,6 +24,7 @@ func NewInputWidgetDemo() *InputWidgetDemo {
 	s := new(InputWidgetDemo)
 
 	s.tiDemo = textinput.New()
+	s.tiDemo.Placeholder = "Placeholder"
 
 	s.taDemo = textarea.New()
 	s.taDemo.SetMinSize(orvyn.NewSize(30, 1))

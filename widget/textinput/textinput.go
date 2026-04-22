@@ -67,11 +67,13 @@ func (w *Widget) Resize(size orvyn.Size) {
 
 	w.BaseWidget.Resize(size)
 
-	contentSize := w.GetSize()
-	// Take borders into account
-	w.Model.Width = contentSize.Width - style.GetHorizontalFrameSize()
-	w.Model.Width -= max(1, len(w.Model.Prompt))
-	w.Model.Width = max(2, w.Model.Width)
+	// 22.04.2026 - Fixed the "space" padding in the bubble textinput
+	contentSize := w.GetContentSize()
+	w.Model.Width = contentSize.Width
+
+	if len(w.Model.Value()) > 0 {
+		w.Model.Width--
+	}
 
 	// For the Bubbles textinput to process the update
 	focused := w.Model.Focused()
