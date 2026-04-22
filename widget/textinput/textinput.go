@@ -71,7 +71,7 @@ func (w *Widget) Resize(size orvyn.Size) {
 	contentSize := w.GetContentSize()
 	w.Model.Width = contentSize.Width
 
-	if len(w.Model.Value()) > 0 {
+	if len(w.Model.Value()) > 0 || len(w.Model.Placeholder) == 0 {
 		w.Model.Width--
 	}
 
