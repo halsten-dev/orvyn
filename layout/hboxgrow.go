@@ -22,6 +22,9 @@ type HBoxGrowLayout struct {
 
 	// fullHeight takes the full layout height.
 	fullHeight bool
+
+	// Align to set the join align
+	Align lipgloss.Position
 }
 
 // NewHBoxGrowLayout creates a new instance of a horizontal grow box layout.
@@ -35,6 +38,7 @@ func NewHBoxGrowLayout(gap, compensatorIndex int, elements ...orvyn.Renderable) 
 	l.gap = gap
 	l.compensatorIndex = compensatorIndex
 	l.fullHeight = false
+	l.Align = lipgloss.Center
 
 	return l
 }
@@ -96,7 +100,7 @@ func (l *HBoxGrowLayout) Render() string {
 		view = append(view, e.Render())
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Center,
+	return lipgloss.JoinHorizontal(l.Align,
 		view...)
 }
 
