@@ -64,7 +64,7 @@ func (l *HBoxFixedRatio) Render() string {
 	totalWidth := layoutSize.Width - l.margin
 
 	if l.gap > 0 {
-		totalWidth -= l.gap*len(l.elements) - 1
+		totalWidth -= l.gap * (len(l.elements) - 1)
 	}
 
 	usedWidth := 0
