@@ -78,7 +78,7 @@ func (l *HBoxGrowLayout) Render() string {
 		}
 	}
 
-	availableWidth := layoutSize.Width - (l.gap*len(l.GetElements()) - 1)
+	availableWidth := layoutSize.Width - l.gap*(len(l.GetElements())-1)
 	elementSize.Width = int(math.Floor(float64(availableWidth / len(l.GetElements()))))
 
 	// calculate the compensation
