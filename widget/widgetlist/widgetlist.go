@@ -736,6 +736,10 @@ func (w *Widget[T]) BlurCurrent() {
 	w.focusManager.BlurCurrent()
 }
 
+func (w *Widget[T]) ExitCurrentInput() {
+	w.focusManager.ExitCurrentInput()
+}
+
 func (w *Widget[T]) FilterState() FilterState {
 	return w.filterState
 }
