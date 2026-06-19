@@ -299,20 +299,46 @@ func (w *Widget[T]) Render() string {
 		}
 	}
 
+	contentSize := w.GetContentSize()
+
 	if w.filterable {
 		elements = append(elements, w.tiFilter.Render())
 	}
 
 	elements = append(elements, b.String())
 
+	paginatorView := ""
+
 	if w.paginator.TotalPages > 1 {
-		elements = append(elements, w.paginator.View())
+		paginatorView = w.paginator.View()
+	}
+
+	// Items use a fixed height, so the rendered content rarely fills the
+	// content area exactly. Absorb the leftover rows as blank space placed
+	// before the paginator: items stay at the top and the paginator is pinned
+	// to the bottom instead of leaving an empty gap below it.
+	usedHeight := 0
+
+	for _, e := range elements {
+		usedHeight += lipgloss.Height(e)
+	}
+
+	if paginatorView != "" {
+		usedHeight += lipgloss.Height(paginatorView)
+	}
+
+	leftover := contentSize.Height - usedHeight
+
+	if leftover > 0 {
+		elements = append(elements, strings.Repeat("\n", leftover-1))
+	}
+
+	if paginatorView != "" {
+		elements = append(elements, paginatorView)
 	}
 
 	view = lipgloss.JoinVertical(lipgloss.Center,
 		elements...)
-
-	contentSize := w.GetContentSize()
 
 	return w.GetStyle().
 		Width(contentSize.Width).
