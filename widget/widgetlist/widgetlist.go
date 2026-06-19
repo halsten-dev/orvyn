@@ -713,8 +713,6 @@ func (w *Widget[T]) removeItem(index int) {
 }
 
 func (w *Widget[T]) FocusFirst() {
-	w.focusManager.FocusFirst()
-
 	if w.filterState == FilterApplied {
 		if len(w.filteredListItems) > 0 {
 			w.globalIndex = w.filteredListItems[0].Index
@@ -727,6 +725,16 @@ func (w *Widget[T]) FocusFirst() {
 		w.paginator.Page = 0
 	} else {
 		w.globalIndex = 0
+	}
+
+	// Focus the cursor's global index directly. Filtering does not deactivate
+	// the filtered-out items, so focusManager.FocusFirst would land on the
+	// first item of the full list instead of the first filtered match, leaving
+	// the focused style desynced from the cursor.
+	if w.globalIndex >= 0 {
+		w.focusManager.Focus(w.globalIndex)
+	} else {
+		w.focusManager.BlurCurrent()
 	}
 
 	w.moveCursor(w.globalIndex)
