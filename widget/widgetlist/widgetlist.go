@@ -270,94 +270,64 @@ func (w *Widget[T]) paginatorUpdate() {
 
 func (w *Widget[T]) Render() string {
 	var elements []string
+	var b strings.Builder
 	var view string
 	var start, end int
-	var indices []int
 
 	elements = make([]string, 0)
 
 	if w.filterState == FilterApplied {
 		start, end = w.paginator.GetSliceBounds(len(w.filteredListItems))
 
-		for _, li := range w.filteredListItems[start:end] {
-			indices = append(indices, li.Index)
+		for i, li := range w.filteredListItems[start:end] {
+			if i > 0 {
+				b.WriteString("\n")
+			}
+
+			item := w.listItems[li.Index]
+			b.WriteString(item.Render())
 		}
 	} else {
 		start, end = w.paginator.GetSliceBounds(len(w.listItems))
 
-		for i := start; i < end; i++ {
-			indices = append(indices, i)
+		for i, li := range w.listItems[start:end] {
+			if i > 0 {
+				b.WriteString("\n")
+			}
+
+			b.WriteString(li.Render())
 		}
 	}
 
 	contentSize := w.GetContentSize()
-
-	cards := make([]string, len(indices))
-	itemsHeight := 0
-
-	for i, idx := range indices {
-		cards[i] = w.listItems[idx].Render()
-		itemsHeight += lipgloss.Height(cards[i])
-	}
-
-	filterHeight := 0
-
-	if w.filterable {
-		filterHeight = lipgloss.Height(w.tiFilter.Render())
-	}
-
-	paginatorView := ""
-	paginatorHeight := 0
-
-	if w.paginator.TotalPages > 1 {
-		paginatorView = w.paginator.View()
-		paginatorHeight = lipgloss.Height(paginatorView)
-	}
-
-	// Items use a fixed height, so the rendered content rarely fills the
-	// content area exactly. Spread the leftover rows as blank space between the
-	// cards so the items fill the area, keeping the paginator pinned to the
-	// bottom. When there are too few cards to space out, the remaining leftover
-	// is placed before the paginator instead.
-	leftover := contentSize.Height - filterHeight - paginatorHeight - itemsHeight
-	gaps := max(len(cards)-1, 0)
-
-	spacing := make([]int, gaps)
-
-	if leftover > 0 && gaps > 0 {
-		base := leftover / gaps
-		rem := leftover % gaps
-
-		for i := 0; i < gaps; i++ {
-			spacing[i] = base
-
-			if i < rem {
-				spacing[i]++
-			}
-		}
-
-		leftover = 0
-	}
-
-	var b strings.Builder
-
-	for i, card := range cards {
-		if i > 0 {
-			b.WriteString("\n")
-
-			if spacing[i-1] > 0 {
-				b.WriteString(strings.Repeat("\n", spacing[i-1]))
-			}
-		}
-
-		b.WriteString(card)
-	}
 
 	if w.filterable {
 		elements = append(elements, w.tiFilter.Render())
 	}
 
 	elements = append(elements, b.String())
+
+	paginatorView := ""
+
+	if w.paginator.TotalPages > 1 {
+		paginatorView = w.paginator.View()
+	}
+
+	// Items use a fixed height, so the rendered content rarely fills the
+	// content area exactly. Absorb the leftover rows as blank space placed
+	// before the paginator: items stay at the top and the paginator is pinned
+	// to the bottom instead of leaving an empty gap below it.
+	usedHeight := 0
+
+	for _, e := range elements {
+		usedHeight += lipgloss.Height(e)
+	}
+
+	if paginatorView != "" {
+		usedHeight += lipgloss.Height(paginatorView)
+	}
+
+	leftover := contentSize.Height - usedHeight
 
 	if leftover > 0 {
 		elements = append(elements, strings.Repeat("\n", leftover-1))
