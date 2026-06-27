@@ -72,8 +72,10 @@ func (w *Widget) Resize(size orvyn.Size) {
 	w.Model.Width = contentSize.Width
 
 	if len(w.Model.Value()) > 0 || len(w.Model.Placeholder) == 0 {
-		w.Model.Width--
-		w.Model.Width -= len(w.Model.Prompt)
+		// Bubbles' View() always renders the cursor as one extra column past
+		// the value, so reserve 1 column on top of the prompt width. Without
+		// the constant -1 the box grows by one column once a value is typed.
+		w.Model.Width -= 1 + len(w.Model.Prompt)
 	}
 
 	// For the Bubbles textinput to process the update
