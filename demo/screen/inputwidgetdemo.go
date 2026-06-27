@@ -24,6 +24,8 @@ func NewInputWidgetDemo() *InputWidgetDemo {
 	s := new(InputWidgetDemo)
 
 	s.tiDemo = textinput.New()
+	s.tiDemo.Prompt = ">"
+	s.tiDemo.Placeholder = "Amazing placeholder"
 	//s.tiDemo.Placeholder = "Placeholder"
 
 	s.taDemo = textarea.New()
