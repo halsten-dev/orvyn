@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Widget struct {
@@ -75,7 +76,11 @@ func (w *Widget) Resize(size orvyn.Size) {
 		// Bubbles' View() always renders the cursor as one extra column past
 		// the value, so reserve 1 column on top of the prompt width. Without
 		// the constant -1 the box grows by one column once a value is typed.
-		w.Model.Width -= 1 + len(w.Model.Prompt)
+		// Measure the prompt in display columns (matching Bubbles' own
+		// lipgloss.Width), not bytes: a multi-byte rune such as 'Ǥ' is 2 bytes
+		// but 1 column, and len() would over-subtract and shrink the box.
+		promptWidth := lipgloss.Width(w.Model.PromptStyle.Render(w.Model.Prompt))
+		w.Model.Width -= 1 + promptWidth
 	}
 
 	// For the Bubbles textinput to process the update
