@@ -69,7 +69,7 @@ func (w *Widget) Resize(size orvyn.Size) {
 
 	// 22.04.2026 - Fixed the "space" padding in the bubble textinput
 	contentSize := w.GetContentSize()
-	w.Model.Width = contentSize.Width
+	w.Model.Width = contentSize.Width - len(w.Model.Prompt)
 
 	if len(w.Model.Value()) > 0 || len(w.Model.Placeholder) == 0 {
 		w.Model.Width--
