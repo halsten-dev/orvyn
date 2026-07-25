@@ -266,6 +266,55 @@ func (w *Widget[T]) paginatorUpdate() {
 	} else {
 		w.paginator.SetTotalPages(len(w.listItems))
 	}
+
+	w.clampCursorState()
+}
+
+// clampCursorState brings the paginator page, the cursor and the global index
+// back inside the bounds of the current list. Both the item count and the
+// per-page capacity change during the widget's life (items replaced or
+// removed, widget resized), and neither paginator.SetTotalPages nor
+// paginator.GetSliceBounds clamp the page index: a page left over from a
+// longer list or a smaller page size makes GetSliceBounds return a start
+// greater than the end, which panics when Render slices the items.
+func (w *Widget[T]) clampCursorState() {
+	perPage := max(w.paginator.PerPage, 1)
+
+	w.paginator.Page = min(w.paginator.Page, w.paginator.TotalPages-1)
+	w.paginator.Page = max(w.paginator.Page, 0)
+
+	if w.filterState == FilterApplied {
+		itemsOnPage := w.paginator.ItemsOnPage(len(w.filteredListItems))
+
+		if itemsOnPage <= 0 {
+			w.cursor = -1
+			w.globalIndex = -1
+
+			return
+		}
+
+		w.cursor = min(w.cursor, itemsOnPage-1)
+		w.cursor = max(w.cursor, 0)
+		w.globalIndex = w.getFilteredGlobalIndex()
+
+		return
+	}
+
+	if len(w.listItems) == 0 {
+		w.cursor = 0
+		w.globalIndex = 0
+
+		return
+	}
+
+	// Unfiltered, the global index is what the cursor tracks: derive the page
+	// and the on-page cursor from it so the selected item stays visible when
+	// the page size changes.
+	w.globalIndex = min(w.globalIndex, len(w.listItems)-1)
+	w.globalIndex = max(w.globalIndex, 0)
+
+	w.paginator.Page = w.globalIndex / perPage
+	w.cursor = w.globalIndex % perPage
 }
 
 func (w *Widget[T]) Render() string {
@@ -278,6 +327,7 @@ func (w *Widget[T]) Render() string {
 
 	if w.filterState == FilterApplied {
 		start, end = w.paginator.GetSliceBounds(len(w.filteredListItems))
+		start = min(start, end)
 
 		for i, li := range w.filteredListItems[start:end] {
 			if i > 0 {
@@ -289,6 +339,7 @@ func (w *Widget[T]) Render() string {
 		}
 	} else {
 		start, end = w.paginator.GetSliceBounds(len(w.listItems))
+		start = min(start, end)
 
 		for i, li := range w.listItems[start:end] {
 			if i > 0 {
@@ -857,6 +908,11 @@ func (w *Widget[T]) enterFilter() {
 
 func (w *Widget[T]) getFilteredGlobalIndex() int {
 	index := (w.paginator.Page * w.paginator.PerPage) + w.cursor
+
+	if index < 0 || index >= len(w.filteredListItems) {
+		return -1
+	}
+
 	return w.filteredListItems[index].Index
 }
 
