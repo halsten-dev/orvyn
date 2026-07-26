@@ -115,6 +115,13 @@ func (f *FocusManager) RemoveWidget(widget Focusable) {
 // Given list order defines the focus order.
 func (f *FocusManager) SetWidgets(widgets []Focusable) {
 	f.widgets = widgets
+
+	// The new list can be shorter than the previous one. Update, NextFocus and
+	// PrevFocus index f.widgets[f.tabIndex] directly, and Focus ignores an
+	// out-of-range index instead of correcting it, so a tab index left over
+	// from the longer list would survive here and panic on the next message.
+	f.tabIndex = min(f.tabIndex, len(f.widgets)-1)
+	f.tabIndex = max(f.tabIndex, 0)
 }
 
 // Focus set the focus on the Focusable Widget at the given index.
@@ -178,6 +185,10 @@ func (f *FocusManager) IsInputting() bool {
 
 // PrevFocus moves the focus to the previous widget.
 func (f *FocusManager) PrevFocus() {
+	if !f.clampTabIndex() {
+		return
+	}
+
 	if f.widgets[f.tabIndex].IsFocused() {
 		f.blur(f.tabIndex)
 	}
@@ -189,6 +200,10 @@ func (f *FocusManager) PrevFocus() {
 
 // NextFocus moves the focus to the next widget.
 func (f *FocusManager) NextFocus() {
+	if !f.clampTabIndex() {
+		return
+	}
+
 	if f.widgets[f.tabIndex].IsFocused() {
 		f.blur(f.tabIndex)
 	}
@@ -228,7 +243,7 @@ func (f *FocusManager) Update(msg tea.Msg) tea.Cmd {
 
 	cmd = nil
 
-	if len(f.widgets) == 0 {
+	if !f.clampTabIndex() {
 		return nil
 	}
 
@@ -305,6 +320,21 @@ func (f *FocusManager) Update(msg tea.Msg) tea.Cmd {
 }
 
 // Hidden functions
+
+// clampTabIndex brings the tab index back inside the widget list and reports
+// whether the list has a widget to work with. Widgets are added, removed and
+// replaced while the manager keeps its index, so callers that index
+// f.widgets[f.tabIndex] use this instead of trusting the stored index.
+func (f *FocusManager) clampTabIndex() bool {
+	if len(f.widgets) == 0 {
+		return false
+	}
+
+	f.tabIndex = min(f.tabIndex, len(f.widgets)-1)
+	f.tabIndex = max(f.tabIndex, 0)
+
+	return true
+}
 
 // focus is a shorthand to manage the focused state and call OnFocus.
 func (f *FocusManager) focus(index int) {

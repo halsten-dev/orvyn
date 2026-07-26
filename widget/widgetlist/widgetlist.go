@@ -621,9 +621,12 @@ func (w *Widget[T]) SetItems(items []T) {
 
 	w.focusManager.SetWidgets(focusableList)
 
-	w.focusManager.Focus(w.globalIndex)
-
+	// paginatorUpdate clamps the global index against the new list, so focus
+	// after it: focusing first would use the index of the previous, possibly
+	// longer list, and Focus ignores an out-of-range index.
 	w.paginatorUpdate()
+
+	w.focusManager.Focus(w.globalIndex)
 }
 
 func (w *Widget[T]) SetCursorMovementKeybinds(cursorUp, cursorDown key.Binding) {

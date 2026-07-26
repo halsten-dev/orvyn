@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/halsten-dev/orvyn"
 )
 
@@ -66,6 +67,48 @@ func TestSetItemsShrinksList(t *testing.T) {
 	}
 
 	w.Render()
+}
+
+// TestSetItemsShrinksListKeepsFocusInRange covers the focus side of the same
+// crash: SetItems hands a shorter widget list to the focus manager, which keeps
+// its old tab index and then indexes past the new list on the next Update.
+func TestSetItemsShrinksListKeepsFocusInRange(t *testing.T) {
+	w := newTestList(t, 20, orvyn.NewSize(20, 10))
+
+	// Move through Update, not NextItem: the focus manager only follows the
+	// cursor from Update, and it is its index that goes stale.
+	for range 15 {
+		w.Update(tea.KeyMsg{Type: tea.KeyDown})
+	}
+
+	if index := w.focusManager.TabIndex(); index != 15 {
+		t.Fatalf("test setup: tab index = %d, want 15", index)
+	}
+
+	w.SetItems([]string{"a", "b"})
+
+	if index := w.focusManager.TabIndex(); index < 0 || index >= w.Length() {
+		t.Errorf("tab index = %d, want inside [0, %d)", index, w.Length())
+	}
+
+	// The panic happens on the first message reaching the focus manager.
+	w.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
+}
+
+// TestSetItemsEmptiesListThenUpdate covers the same path down to an empty list,
+// where the focus manager has no widget left to index at all.
+func TestSetItemsEmptiesListThenUpdate(t *testing.T) {
+	w := newTestList(t, 20, orvyn.NewSize(20, 10))
+
+	for range 15 {
+		w.Update(tea.KeyMsg{Type: tea.KeyDown})
+	}
+
+	w.SetItems([]string{})
+
+	w.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
+	w.Update(tea.KeyMsg{Type: tea.KeyDown})
+	w.Update(tea.KeyMsg{Type: tea.KeyUp})
 }
 
 // TestSetItemsEmptiesList covers replacing the list with an empty one.
