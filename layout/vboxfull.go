@@ -1,7 +1,6 @@
 package layout
 
 import (
-	"math"
 	"strings"
 
 	"github.com/halsten-dev/orvyn"
@@ -14,9 +13,7 @@ type VBoxFullLayout struct {
 	growWidget orvyn.Renderable
 	maxWidth   bool
 
-	autoFlex               bool
-	fixedHeightElements    []orvyn.Renderable
-	flexibleHeightElements []flexibleHeightElement
+	autoFlex bool
 }
 
 func NewVBoxFullLayout(margin orvyn.Size, growIndex int, elements ...orvyn.Renderable) *VBoxFullLayout {
@@ -63,32 +60,6 @@ func newFlexibleVBoxFullLayout(margin orvyn.Size, maxWidth bool, elements ...orv
 	l.maxWidth = maxWidth
 	l.autoFlex = true
 
-	l.fixedHeightElements = make([]orvyn.Renderable, 0)
-	l.flexibleHeightElements = make([]flexibleHeightElement, 0)
-
-	for _, e := range elements {
-		fixedHeight := false
-
-		eMinHeight := e.GetMinSize().Height
-		ePrefHeight := e.GetPreferredSize().Height
-
-		switch {
-		case ePrefHeight == 0:
-			fixedHeight = true
-		case eMinHeight == ePrefHeight:
-			fixedHeight = true
-		}
-
-		if fixedHeight {
-			l.fixedHeightElements = append(l.fixedHeightElements, e)
-			continue
-		}
-
-		l.flexibleHeightElements = append(l.flexibleHeightElements, flexibleHeightElement{
-			element: e,
-		})
-	}
-
 	return l
 }
 
@@ -105,18 +76,12 @@ func (l *VBoxFullLayout) Render() string {
 	width := l.fitWidth(layoutSize.Width)
 
 	if l.autoFlex {
-		l.resizeAutoFlex(width, layoutSize.Height)
+		resizeFlexibleElements(width, max(layoutSize.Height-l.margin.Height, 0), visibleElements...)
 	} else {
 		l.resizeSingleGrow(width, layoutSize)
 	}
 
-	for i, e := range visibleElements {
-		if i > 0 {
-			b.WriteString("\n")
-		}
-
-		b.WriteString(e.Render())
-	}
+	writeElements(&b, visibleElements)
 
 	return b.String()
 }
@@ -154,51 +119,6 @@ func (l *VBoxFullLayout) resizeSingleGrow(width int, layoutSize orvyn.Size) {
 
 	if l.growWidget != nil {
 		l.growWidget.Resize(l.calculateGrowSize(orvyn.NewSize(width, 0), layoutSize))
-	}
-}
-
-// resizeAutoFlex resizes fixed elements to their own height then shares the
-// leftover height among flexible elements proportionally to their preferred height.
-// Rounding remainder goes to the last flexible element so the layout fills its height.
-func (l *VBoxFullLayout) resizeAutoFlex(width, layoutHeight int) {
-	remaining := layoutHeight - l.margin.Height
-
-	for _, e := range l.fixedHeightElements {
-		height := e.GetMinSize().Height
-
-		if height == 0 {
-			height = e.GetSize().Height
-		}
-
-		e.Resize(orvyn.NewSize(width, height))
-		remaining -= height
-	}
-
-	remaining = max(remaining, 0)
-
-	totalFlexPref := 0
-	for _, e := range l.flexibleHeightElements {
-		totalFlexPref += e.element.GetPreferredSize().Height
-	}
-
-	if totalFlexPref == 0 {
-		return
-	}
-
-	left := remaining
-
-	for i, e := range l.flexibleHeightElements {
-		var height int
-
-		if i == len(l.flexibleHeightElements)-1 {
-			height = max(left, 0)
-		} else {
-			height = int(math.Round(
-				float64(remaining) * float64(e.element.GetPreferredSize().Height) / float64(totalFlexPref)))
-		}
-
-		e.element.Resize(orvyn.NewSize(width, height))
-		left -= height
 	}
 }
 

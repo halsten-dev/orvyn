@@ -1,32 +1,28 @@
 package layout
 
 import (
-	"math"
 	"strings"
 
 	"github.com/halsten-dev/orvyn"
 )
 
-type flexibleHeightElement struct {
-	element     orvyn.Renderable
-	heightRatio float64
-}
-
-// DefinedWidthVerticalLayout arranges vertically elements within the given width values.
-// The height of each element will be defined between the min and the preferred size.
-// Widgets that return 0,0 or the same min and preferred size are considered as fixed size widgets.
+// DefinedWidthVerticalLayout arranges elements vertically within the given width
+// bounds. Elements whose minimal and preferred heights differ share the leftover
+// height proportionally to their preferred heights; the others keep their own
+// height. Widgets that return 0 or the same min and preferred height are
+// considered fixed size widgets.
 type DefinedWidthVerticalLayout struct {
 	orvyn.BaseLayout
 
 	PreferredWidth int
 	MinWidth       int
-	Margin         int
 
-	fixedHeightElements    []orvyn.Renderable
-	flexibleHeightElements []flexibleHeightElement
+	// Margin is the space kept free around the elements. Width is the total
+	// horizontal space removed, Height the total vertical one.
+	Margin orvyn.Size
 }
 
-func NewDefinedWidthVerticalLayout(minWidth int, prefWidth int, margin int, elements ...orvyn.Renderable) *DefinedWidthVerticalLayout {
+func NewDefinedWidthVerticalLayout(minWidth int, prefWidth int, margin orvyn.Size, elements ...orvyn.Renderable) *DefinedWidthVerticalLayout {
 	l := new(DefinedWidthVerticalLayout)
 
 	l.BaseLayout = orvyn.NewBaseLayout(elements...)
@@ -35,97 +31,45 @@ func NewDefinedWidthVerticalLayout(minWidth int, prefWidth int, margin int, elem
 	l.PreferredWidth = prefWidth
 	l.Margin = margin
 
-	l.fixedHeightElements = make([]orvyn.Renderable, 0)
-	l.flexibleHeightElements = make([]flexibleHeightElement, 0)
-
-	for _, e := range elements {
-		fixedHeight := false
-
-		eMinHeight := e.GetMinSize().Height
-		ePrefHeight := e.GetPreferredSize().Height
-
-		switch {
-		case ePrefHeight == 0:
-			fixedHeight = true
-		case eMinHeight == ePrefHeight:
-			fixedHeight = true
-		}
-
-		if fixedHeight {
-			l.fixedHeightElements = append(l.fixedHeightElements, e)
-			continue
-		}
-
-		el := flexibleHeightElement{
-			element: e,
-		}
-
-		l.flexibleHeightElements = append(l.flexibleHeightElements, el)
-	}
-
 	return l
 }
 
 func (l *DefinedWidthVerticalLayout) Render() string {
 	var b strings.Builder
-	var s orvyn.Size
-	var minSize orvyn.Size
-	var prefSize orvyn.Size
 
-	if len(l.GetElements()) == 0 {
+	visibleElements := l.GetElements()
+
+	if len(visibleElements) == 0 {
 		return ""
 	}
 
-	l.calculateHeightRatio()
+	layoutSize := l.GetSize()
 
-	size := l.GetSize()
+	resizeFlexibleElements(
+		l.fitWidth(layoutSize.Width),
+		max(layoutSize.Height-l.Margin.Height, 0),
+		visibleElements...)
 
-	s = orvyn.NewSize(size.Width-l.Margin, size.Height-l.Margin)
-
-	minSize = l.GetMinSize()
-	prefSize = l.GetPreferredSize()
-
-	if s.Width <= minSize.Width {
-		s.Width = minSize.Width - l.Margin
-	} else if s.Width >= prefSize.Width {
-		s.Width = prefSize.Width - l.Margin
-	}
-
-	s.Height = max(s.Height, 0)
-
-	l.calculateSize(s)
-
-	for i, e := range l.GetElements() {
-		if i > 0 {
-			b.WriteString("\n")
-		}
-
-		b.WriteString(e.Render())
-	}
+	writeElements(&b, visibleElements)
 
 	return b.String()
 }
 
-func (l *DefinedWidthVerticalLayout) calculateSize(size orvyn.Size) {
-	totalHeight := size.Height
+// fitWidth returns the element width: the available width minus the margin, kept
+// within the layout min and preferred widths. The available width always wins so
+// a terminal narrower than MinWidth shrinks the content instead of overflowing.
+func (l *DefinedWidthVerticalLayout) fitWidth(layoutWidth int) int {
+	width := layoutWidth - l.Margin.Width
 
-	for _, e := range l.fixedHeightElements {
-		eHeight := e.GetSize().Height
-		totalHeight -= eHeight
-		e.Resize(orvyn.NewSize(size.Width, eHeight))
-	}
+	width = min(width, l.PreferredWidth-l.Margin.Width)
+	width = max(width, l.MinWidth-l.Margin.Width)
+	width = min(width, layoutWidth)
 
-	for _, e := range l.flexibleHeightElements {
-		eHeight := int(math.Round(float64(totalHeight) * e.heightRatio))
-
-		e.element.Resize(orvyn.NewSize(size.Width, eHeight))
-	}
+	return max(width, 0)
 }
 
 func (l *DefinedWidthVerticalLayout) GetMinSize() orvyn.Size {
-	var size orvyn.Size
-
-	size.Width = l.MinWidth
+	size := orvyn.NewSize(l.MinWidth, l.Margin.Height)
 
 	for _, e := range l.GetElements() {
 		height := e.GetMinSize().Height
@@ -141,9 +85,7 @@ func (l *DefinedWidthVerticalLayout) GetMinSize() orvyn.Size {
 }
 
 func (l *DefinedWidthVerticalLayout) GetPreferredSize() orvyn.Size {
-	var size orvyn.Size
-
-	size.Width = l.PreferredWidth
+	size := orvyn.NewSize(l.PreferredWidth, l.Margin.Height)
 
 	for _, e := range l.GetElements() {
 		height := e.GetPreferredSize().Height
@@ -156,27 +98,4 @@ func (l *DefinedWidthVerticalLayout) GetPreferredSize() orvyn.Size {
 	}
 
 	return size
-}
-
-func (l *DefinedWidthVerticalLayout) calculateHeightRatio() {
-	maxHeight := l.GetPreferredSize().Height
-
-	fixedElementHeight := 0
-
-	for _, e := range l.fixedHeightElements {
-		height := e.GetPreferredSize().Height
-
-		if height == 0 {
-			height = e.GetSize().Height
-		}
-
-		fixedElementHeight -= height
-	}
-
-	maxHeight -= fixedElementHeight
-
-	for i, e := range l.flexibleHeightElements {
-		l.flexibleHeightElements[i].heightRatio =
-			float64(e.element.GetPreferredSize().Height) / float64(maxHeight)
-	}
 }
