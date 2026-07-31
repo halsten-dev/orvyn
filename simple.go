@@ -53,22 +53,26 @@ func (s *SimpleRenderable) Render() string {
 		Height(size.Height).Render(s.value)
 }
 
+// GetMinSize returns the size the value actually renders at, unless a size was
+// set explicitly with SetMinSize.
+//
+// It used to measure the literal string "min", so every SimpleRenderable claimed
+// to be one line tall whatever it held. Layouts budgeted one row for a multi-line
+// value and the overflow ate their margin.
 func (s *SimpleRenderable) GetMinSize() Size {
-	vFrame, hFrame := s.Style.GetFrameSize()
-
-	if vFrame+hFrame == 0 {
-		s.BaseRenderable.GetMinSize()
+	if size := s.BaseRenderable.GetMinSize(); size != NewSize(1, 1) {
+		return size
 	}
 
-	return GetRenderSize(s.Style, "min")
+	return GetRenderSize(s.Style, s.value)
 }
 
+// GetPreferredSize returns the size the value actually renders at, unless a size
+// was set explicitly with SetPreferredSize. See GetMinSize.
 func (s *SimpleRenderable) GetPreferredSize() Size {
-	vFrame, hFrame := s.Style.GetFrameSize()
-
-	if vFrame+hFrame == 0 {
-		s.BaseRenderable.GetPreferredSize()
+	if size := s.BaseRenderable.GetPreferredSize(); size != NewSize(1, 1) {
+		return size
 	}
 
-	return GetRenderSize(s.Style, "pref")
+	return GetRenderSize(s.Style, s.value)
 }
