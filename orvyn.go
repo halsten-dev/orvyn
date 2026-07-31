@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/halsten-dev/orvyn/theme"
 )
 
@@ -87,7 +88,16 @@ func Render() string {
 	}
 
 	layout.Resize(WindowSize)
-	return layout.Render()
+
+	// Clip to the window. A layout can legitimately render taller than the space
+	// it was given - widgets have a minimal height they cannot go under - and
+	// emitting more lines than the terminal has makes the terminal scroll, which
+	// silently eats the *top* of the screen. Cutting the overflow off the bottom
+	// keeps the top anchored where the user expects it.
+	return lipgloss.NewStyle().
+		MaxWidth(WindowSize.Width).
+		MaxHeight(WindowSize.Height).
+		Render(layout.Render())
 }
 
 // Helper

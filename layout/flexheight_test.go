@@ -79,13 +79,14 @@ func TestResizeFlexibleElementsSubtractsFixedHeights(t *testing.T) {
 		t.Errorf("fixed element height = %d, want 3", got)
 	}
 
-	// 23 - 3 = 20 left, split 10:30 -> 5 and 15.
-	if got := flexA.GetSize().Height; got != 5 {
-		t.Errorf("flexA height = %d, want 5", got)
+	// 23 - 3 = 20 left. Both minimums (5 + 5) come off first, leaving a surplus of
+	// 10 split 10:30 -> 3 and 7. So 5+3 = 8 and 5+7 = 12.
+	if got := flexA.GetSize().Height; got != 8 {
+		t.Errorf("flexA height = %d, want 8", got)
 	}
 
-	if got := flexB.GetSize().Height; got != 15 {
-		t.Errorf("flexB height = %d, want 15", got)
+	if got := flexB.GetSize().Height; got != 12 {
+		t.Errorf("flexB height = %d, want 12", got)
 	}
 
 	if got := sum(allocatedHeights(fixed, flexA, flexB)); got != 23 {
@@ -107,6 +108,46 @@ func TestResizeFlexibleElementsFillsHeightExactly(t *testing.T) {
 		if got := sum(allocatedHeights(fixed, flexA, flexB, flexC)); got != available {
 			t.Errorf("available %d: total allocated = %d, want %d", available, got, available)
 		}
+	}
+}
+
+// A flexible element allocated less than its minimal height renders at its
+// minimum anyway, so the layout overflows by the difference. Never allocate below
+// the minimum while there is room for it.
+func TestResizeFlexibleElementsNeverAllocatesBelowMinimum(t *testing.T) {
+	// Small preferred height next to a huge one: a pure preferred-height ratio
+	// starves this element well under its minimum.
+	small := newFlexStub(orvyn.NewSize(10, 10), orvyn.NewSize(10, 12))
+	hungryA := newFlexStub(orvyn.NewSize(10, 5), orvyn.NewSize(10, 35))
+	hungryB := newFlexStub(orvyn.NewSize(10, 5), orvyn.NewSize(10, 35))
+
+	resizeFlexibleElements(40, 38, small, hungryA, hungryB)
+
+	for name, e := range map[string]*flexStub{"small": small, "hungryA": hungryA, "hungryB": hungryB} {
+		if got, want := e.GetSize().Height, e.GetMinSize().Height; got < want {
+			t.Errorf("%s height = %d, below its minimum of %d", name, got, want)
+		}
+	}
+
+	if got := sum(allocatedHeights(small, hungryA, hungryB)); got != 38 {
+		t.Errorf("total allocated = %d, want 38", got)
+	}
+}
+
+// When the minimums do not even fit, they are shared proportionally rather than
+// letting the first elements take everything and the last get nothing.
+func TestResizeFlexibleElementsSharesWhenMinimumsDoNotFit(t *testing.T) {
+	a := newFlexStub(orvyn.NewSize(10, 10), orvyn.NewSize(10, 20))
+	b := newFlexStub(orvyn.NewSize(10, 10), orvyn.NewSize(10, 20))
+
+	resizeFlexibleElements(40, 10, a, b)
+
+	if got := a.GetSize().Height; got != 5 {
+		t.Errorf("a height = %d, want 5", got)
+	}
+
+	if got := b.GetSize().Height; got != 5 {
+		t.Errorf("b height = %d, want 5", got)
 	}
 }
 

@@ -55,9 +55,18 @@ func fixedHeight(e orvyn.Renderable) int {
 }
 
 // resizeFlexibleElements gives every fixed-height element its own height, then
-// shares the remaining height among the flexible ones proportionally to their
-// preferred heights. The rounding remainder goes to the last flexible element so
-// the allocation always adds up to availableHeight exactly.
+// shares the remaining height among the flexible ones. Each flexible element is
+// guaranteed its minimal height first, and only the surplus on top of it is split
+// proportionally to the preferred heights. Allocating below the minimum would be
+// a lie: the widget renders at its minimum anyway and the layout overflows by the
+// difference.
+//
+// When there is not even room for every minimum, the minimums themselves are what
+// gets shared, scaled down proportionally, so one element cannot starve while
+// another keeps its full share.
+//
+// The rounding remainder goes to the last flexible element, so the allocation
+// always adds up to availableHeight exactly.
 //
 // Elements must be the ones actually being rendered: an element that is not
 // passed here reserves no height. The fixed/flexible split is recomputed on
@@ -66,7 +75,6 @@ func resizeFlexibleElements(width, availableHeight int, elements ...orvyn.Render
 	flexible := make([]orvyn.Renderable, 0, len(elements))
 
 	remaining := availableHeight
-	totalFlexPref := 0
 
 	for _, e := range elements {
 		if isFixedHeight(e) {
@@ -79,13 +87,38 @@ func resizeFlexibleElements(width, availableHeight int, elements ...orvyn.Render
 		}
 
 		flexible = append(flexible, e)
-		totalFlexPref += e.GetPreferredSize().Height
+	}
+
+	if len(flexible) == 0 {
+		return
 	}
 
 	remaining = max(remaining, 0)
 
-	if len(flexible) == 0 || totalFlexPref == 0 {
-		return
+	minTotal := 0
+	prefTotal := 0
+
+	for _, e := range flexible {
+		minTotal += e.GetMinSize().Height
+		prefTotal += e.GetPreferredSize().Height
+	}
+
+	// Every element starts at its minimum and the surplus is shared by preferred
+	// height...
+	guaranteed := func(e orvyn.Renderable) int { return e.GetMinSize().Height }
+	weight := func(e orvyn.Renderable) int { return e.GetPreferredSize().Height }
+
+	surplus := remaining - minTotal
+	weightTotal := prefTotal
+
+	// ...unless the minimums alone do not fit, in which case they are the thing
+	// being shared.
+	if surplus < 0 {
+		guaranteed = func(orvyn.Renderable) int { return 0 }
+		weight = func(e orvyn.Renderable) int { return e.GetMinSize().Height }
+
+		surplus = remaining
+		weightTotal = minTotal
 	}
 
 	left := remaining
@@ -93,11 +126,14 @@ func resizeFlexibleElements(width, availableHeight int, elements ...orvyn.Render
 	for i, e := range flexible {
 		var height int
 
-		if i == len(flexible)-1 {
+		switch {
+		case i == len(flexible)-1:
 			height = max(left, 0)
-		} else {
-			height = int(math.Round(
-				float64(remaining) * float64(e.GetPreferredSize().Height) / float64(totalFlexPref)))
+		case weightTotal == 0:
+			height = guaranteed(e)
+		default:
+			height = guaranteed(e) + int(math.Round(
+				float64(surplus)*float64(weight(e))/float64(weightTotal)))
 		}
 
 		e.Resize(orvyn.NewSize(width, height))
