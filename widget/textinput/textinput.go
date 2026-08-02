@@ -48,6 +48,17 @@ func (w *Widget) Update(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
+// SetValue fills the input and leaves the cursor at the end of the new value.
+//
+// Bubbles only moves the cursor itself when the field was empty or when the
+// current position sits past the end of the new value. Replacing a short value
+// with a longer one — a "0" default with a real quantity, say — would otherwise
+// strand the cursor wherever it happened to be, in the middle of the value.
+func (w *Widget) SetValue(value string) {
+	w.Model.SetValue(value)
+	w.Model.CursorEnd()
+}
+
 func (w *Widget) OnFocus() {
 	w.BaseFocusable.OnFocus()
 	w.Model.Focus()
