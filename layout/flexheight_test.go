@@ -134,6 +134,68 @@ func TestResizeFlexibleElementsNeverAllocatesBelowMinimum(t *testing.T) {
 	}
 }
 
+// The last flexible element used to be handed whatever was left with no floor
+// at all, so rounding on the earlier elements could starve it below its own
+// minimum even though the layout, as a whole, had room for every minimum.
+//
+// Four equal-weight flexible elements make this concrete: surplus is 2 split
+// four ways at weight 2 each, a continuous share of 0.5 per element. Each of
+// the first three rounds its 0.5 up to 1 (Go's math.Round rounds half away
+// from zero), so they consume 3 of a surplus that only totalled 2 before the
+// last element is ever considered. Its naive leftover is 3-1-1-1 = 0, one row
+// short of its own minimum of 1. The fix guarantees it that minimum instead,
+// so the layout now overflows by 1 (4 allocated for 3 available) - exactly
+// the documented trade-off: never lie about the minimum, overflow instead.
+func TestResizeFlexibleElementsLastFlexibleNeverStarvedByRounding(t *testing.T) {
+	a := newFlexStub(orvyn.NewSize(10, 0), orvyn.NewSize(10, 2))
+	b := newFlexStub(orvyn.NewSize(10, 0), orvyn.NewSize(10, 2))
+	c := newFlexStub(orvyn.NewSize(10, 0), orvyn.NewSize(10, 2))
+	last := newFlexStub(orvyn.NewSize(10, 1), orvyn.NewSize(10, 2))
+
+	resizeFlexibleElements(40, 3, a, b, c, last)
+
+	if got, want := last.GetSize().Height, last.GetMinSize().Height; got != want {
+		t.Errorf("last element height = %d, want its minimum of %d", got, want)
+	}
+
+	// The layout was 1 row short of even fitting every minimum once rounding
+	// is accounted for, so the total legitimately overflows by 1.
+	if got := sum(allocatedHeights(a, b, c, last)); got != 4 {
+		t.Errorf("total allocated height = %d, want 4 (available 3 + 1 row of overflow)", got)
+	}
+}
+
+// Regression guard: a single flexible element with ample height must still be
+// allocated exactly the leftover, byte-identical to before the fix. With only
+// one flexible element it is always both first and last, and remaining is
+// already >= its minimum, so the new floor never engages - this proves the
+// fix changes nothing in the ordinary case.
+func TestResizeFlexibleElementsSingleFlexibleFillsLeftoverExactly(t *testing.T) {
+	flex := newFlexStub(orvyn.NewSize(10, 10), orvyn.NewSize(10, 20))
+
+	resizeFlexibleElements(40, 15, flex)
+
+	if got, want := flex.GetSize().Height, 15; got != want {
+		t.Errorf("flexible height = %d, want %d (all of the leftover)", got, want)
+	}
+}
+
+// A single flexible element whose minimum exceeds the available height never
+// reaches the new floor: with only one flexible element, minTotal is just its
+// own minimum, so failing to fit it always takes the surplus-was-negative
+// branch, where guaranteed is rebound to 0 for every element (see
+// resizeFlexibleElements). The fix must not change that: it still scales down
+// to exactly what is left, rather than being floored back up to its minimum.
+func TestResizeFlexibleElementsSingleFlexibleBelowMinimumStillScalesDown(t *testing.T) {
+	flex := newFlexStub(orvyn.NewSize(10, 10), orvyn.NewSize(10, 20))
+
+	resizeFlexibleElements(40, 5, flex)
+
+	if got, want := flex.GetSize().Height, 5; got != want {
+		t.Errorf("flexible height = %d, want %d (scaled down to the leftover, not floored to its minimum of 10)", got, want)
+	}
+}
+
 // When the minimums do not even fit, they are shared proportionally rather than
 // letting the first elements take everything and the last get nothing.
 func TestResizeFlexibleElementsSharesWhenMinimumsDoNotFit(t *testing.T) {

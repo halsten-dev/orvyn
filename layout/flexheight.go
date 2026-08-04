@@ -66,7 +66,10 @@ func fixedHeight(e orvyn.Renderable) int {
 // another keeps its full share.
 //
 // The rounding remainder goes to the last flexible element, so the allocation
-// always adds up to availableHeight exactly.
+// adds up to availableHeight exactly whenever there is room. The last element
+// still never drops below its own guaranteed floor, so when rounding on the
+// earlier elements leaves it less than that, the total exceeds availableHeight
+// instead - which is the overflow case described above, not a rounding loss.
 //
 // Elements must be the ones actually being rendered: an element that is not
 // passed here reserves no height. The fixed/flexible split is recomputed on
@@ -128,7 +131,7 @@ func resizeFlexibleElements(width, availableHeight int, elements ...orvyn.Render
 
 		switch {
 		case i == len(flexible)-1:
-			height = max(left, 0)
+			height = max(left, guaranteed(e))
 		case weightTotal == 0:
 			height = guaranteed(e)
 		default:
